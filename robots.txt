@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://WinterXMQ.github.io/:Winter/sitemap.xml 
+Sitemap: http://WinterXMQ.github.io/sitemap.xml 
