@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-09-21T20:32:29+00:00</updated>
+  <updated>2014-09-23T11:49:16+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -14,11 +14,44 @@
 
   
   <entry>
-    <title type="html"><![CDATA[GitHub Pages.markdown]]></title>
-    <link href="http://WinterXMQ.github.io/blog/2014/09/21/github-pages-dot-markdown/"/>
+    <title type="html"><![CDATA[GitHub Pages]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/09/21/github-pages/"/>
     <updated>2014-09-21T13:44:02+00:00</updated>
-    <id>http://WinterXMQ.github.io/blog/2014/09/21/github-pages-dot-markdown</id>
-    <content type="html"><![CDATA[
+    <id>http://WinterXMQ.github.io/blog/2014/09/21/github-pages</id>
+    <content type="html"><![CDATA[<h1>用GitHub Pages来构建基于Octopress的Blog系统</h1>
+
+<p>把Blog的源码托管在Github上，采用Github的Pages功能来呈现</p>
+
+<p>[TOC]</p>
+
+<h2>配置git的ssh key</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; ssh-keygen -t rsa -C <span class="s2">&quot;WinterXMQ@google.com&quot;</span>
+</span><span class='line'>  &gt;&gt; clip &lt; ~/.ssh/id_rsa.pub
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在执行 <code>ssh-keygen</code> 后需要输入 <code>passphrase</code>
+执行完两个命令后ssh的公钥就已经在系统的粘贴板上了，然后登陆Github的设置->添加ssh公钥上完成相关的添加
+接着按照下面的指令完成相关的测试</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; ssh -T git@github.com
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当出现如下的提示，则说明配置成功</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Enter passphrase <span class="k">for</span> key <span class="s1">&#39;/home/xmq/.ssh/id_rsa&#39;</span>:
+</span><span class='line'>Hi WinterXMQ! You<span class="err">&#39;</span>ve successfully authenticated, but GitHub does not provide shell access.
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 ]]></content>
   </entry>
   

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: coding | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/coding/atom.xml" rel="self"/>
+  <link href="http://WinterXMQ.github.io/"/>
+  <updated>2014-09-23T11:49:16+00:00</updated>
+  <id>http://WinterXMQ.github.io/</id>
+  <author>
+    <name><![CDATA[WinterXMQ]]></name>
+    <email><![CDATA[WinterXMQ@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[GitHub Pages]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/09/21/github-pages/"/>
+    <updated>2014-09-21T13:44:02+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/09/21/github-pages</id>
+    <content type="html"><![CDATA[<h1>用GitHub Pages来构建基于Octopress的Blog系统</h1>
+
+<p>把Blog的源码托管在Github上，采用Github的Pages功能来呈现</p>
+
+<p>[TOC]</p>
+
+<h2>配置git的ssh key</h2>
+
+<pre><code class="bash">  &gt;&gt; ssh-keygen -t rsa -C "WinterXMQ@google.com"
+  &gt;&gt; clip &lt; ~/.ssh/id_rsa.pub
+</code></pre>
+
+<p>在执行 <code>ssh-keygen</code> 后需要输入 <code>passphrase</code>
+执行完两个命令后ssh的公钥就已经在系统的粘贴板上了，然后登陆Github的设置->添加ssh公钥上完成相关的添加
+接着按照下面的指令完成相关的测试</p>
+
+<pre><code class="bash">  &gt;&gt; ssh -T git@github.com
+</code></pre>
+
+<p>当出现如下的提示，则说明配置成功</p>
+
+<pre><code class="bash">Enter passphrase for key '/home/xmq/.ssh/id_rsa': 
+Hi WinterXMQ! You've successfully authenticated, but GitHub does not provide shell access.
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
