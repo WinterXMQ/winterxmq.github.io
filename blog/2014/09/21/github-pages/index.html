@@ -5,12 +5,12 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>GitHub Pages - 落寞纷飞</title>
+	<title>GitHub Pages搭建基于Octopress的Blog - 落寞纷飞</title>
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="GitHub Pages 用GitHub Pages来构建基于Octopress的Blog系统 把Blog的源码托管在Github上，采用Github的Pages功能来呈现 [TOC] 配置git的ssh key 1
-2 &gt;&gt; ssh-keygen -t rsa -C &quot; &hellip;">
+	<meta name="description" content="GitHub Pages搭建基于Octopress的Blog 把Blog的源码托管在Github上，采用Github的Pages功能来呈现 [TOC] 配置git的ssh key 1
+2 &gt;&gt; ssh-keygen -t rsa -C &quot;WinterXMQ@google. &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,14 +101,12 @@
 			
 			<div class="mid-col-container">
 				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-	<h1 class="title" itemprop="name">GitHub Pages</h1>
-	<div class="entry-content" itemprop="articleBody"><h1>用GitHub Pages来构建基于Octopress的Blog系统</h1>
-
-<p>把Blog的源码托管在Github上，采用Github的Pages功能来呈现</p>
+	<h1 class="title" itemprop="name">GitHub Pages搭建基于Octopress的Blog</h1>
+	<div class="entry-content" itemprop="articleBody"><p>把Blog的源码托管在Github上，采用Github的Pages功能来呈现</p>
 
 <p>[TOC]</p>
 
-<h2>配置git的ssh key</h2>
+<h1>配置git的ssh key</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -135,7 +133,181 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>配置本地的ruby和Jekyll、Octopress环境</h1>
 
+<p>Octopress是基于Jekyll的，而Jekyll则是编写而成的，因此我们需要分别搭建这三个环境</p>
+
+<h2>关于Ruby的安装配置</h2>
+
+<p>网上有说需要保持ruby在某个版本上，根据我的测试，采用最新版本的ruby也同样没有问题，估计是早期的Jekyll对高版本的Ruby支持不好
+在Arch Linux下采用 <code>pacman -S ruby</code> 完成Ruby的安装(默认Ruby已经安装)</p>
+
+<p>Ruby 的官方源在国内的速度不佳，更换成淘宝的Ruby源</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; gem sources -a https://ruby.taobao.org/
+</span><span class='line'>  &gt;&gt; gem sources --remove https://rubygems.org/
+</span><span class='line'>  &gt;&gt; gem sources -l
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注: 确保只有一条地址</p>
+
+<p>采用 <code>sudo gem update --system</code> 更新gem脚本</p>
+
+<h2>关于Jekyll和Octopress的安装</h2>
+
+<p>Jekyll是Octopress的一个依赖，因此不用特意安装Jekyll
+确保系统安装有 <code>Git</code>, 从Github上获取Octopress官方源码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; <span class="nb">cd </span>Code
+</span><span class='line'>  &gt;&gt; git clone <span class="s2">&quot;git://github.com/imathis/octopress.git&quot;</span> blog
+</span><span class='line'>  &gt;&gt; <span class="nb">cd </span>blog
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个目录就是以后写Blog和发布Blog的工作目录</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> + _deploy       &lt;- 发布在Github上用于站点显示的master<span class="o">(</span>gh-pages<span class="o">)</span>分支
+</span><span class='line'> + public
+</span><span class='line'> + plugins        &lt;- 用于放置Octopress的插件
+</span><span class='line'> + sass           &lt;- 似乎和模板的关系比较密切, 作用未知
+</span><span class='line'> - <span class="nb">source</span>     &lt;- 放置站点源码, 包括Blog的Makedown文件
+</span><span class='line'>   ...
+</span><span class='line'>   + _posts       &lt;- 放置Blog的Makedown文件
+</span><span class='line'> + .themes        &lt;- 放置主题的
+</span><span class='line'> . _config.yml    &lt;- 站点总配置文件
+</span><span class='line'> . Gemfile        &lt;- Octopress安装脚本配置
+</span><span class='line'> . Rakefile       &lt;- Octopress控制脚本
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Octopress是采用 <code>bundle</code> 来完成安装的, <code>bundle</code> 会读取当前目录下的 <code>Gemfile</code> 来获取本次安装的软件源、以及所需要安装的软件包, <code>bundle</code> 会给出一些软件的依赖关系, 并自动安装所依赖的软件
+同时 <code>bundle</code> 也是Ruby的软件需要通过 <code>gem install bundler</code> 来完成安装
+然而通过 <code>gem</code> 安装的软件会被安装在 <code>~/.gem/ruby/VERSION_RUBY/</code>, 需要添加环境变量</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; sudo vim /etc/profile
+</span><span class='line'>  add follow to the end of the file
+</span><span class='line'>  <span class="nv">RUBY_HOME</span><span class="o">=</span>~/.gem/ruby/2.1.0
+</span><span class='line'>  <span class="nv">PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span>:<span class="k">${</span><span class="nv">RUBY_HOME</span><span class="k">}</span>/bin
+</span><span class='line'>  <span class="nb">export </span>RUBY_HOME PATH
+</span><span class='line'>  &gt;&gt; <span class="nb">source</span> /etc/profile
+</span><span class='line'>  &gt;&gt; bundle --version
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此外我们需要把 <code>Gemfile</code> 第一行的软件源换成<a href="https://ruby.taobao.org/">淘宝Ruby源</a> <code>source 'https://ruby.taobao.org/'</code>
+然后执行 <code>bundle install</code>, 并耐性等待(当然采用国内的Ruby源, 安装时间不会太长)</p>
+
+<h1>Blog工作目录与Github的设置</h1>
+
+<p>无论是站点源码还是Blog都是采用git来管理, 需要把本地目录和Github做对接, 同时对站点进行最初步的设置</p>
+
+<h2>与Github对接</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; git remote rm origin          <span class="c"># 删除Octopress的远程分支</span>
+</span><span class='line'>  &gt;&gt; rake setup_github_pages
+</span><span class='line'>    git@github.com:WinterXMQ/winterxmq.github.io.git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>站点初始化设置</h2>
+
+<p>安装主题</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; git clone git@github.com:shashankmehta/greyshade.git .themes/greyshade
+</span><span class='line'>  &gt;&gt; <span class="nb">echo</span> <span class="s2">&quot;\$greyshade: color;&quot;</span> &gt;&gt; sass/custom/_colors.scss
+</span><span class='line'>  &gt;&gt; rake <span class="s2">&quot;install[greyshade]&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>生成站点数据</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; rake generate
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注: 在Jekyll编译的时候会出现错误, 提示没有Javascript的解释器, 这里有两三个解决方案, 我采用的是安装nodejs, 采用 <code>sudo pacman -S nodejs</code> 完成安装</p>
+
+<p>通过 4000 端口在本地预览Blog站点, <a href="http://127.0.0.1:400">http://127.0.0.1:400</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; rake preview
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>上传源码</h2>
+
+<p>把源码上传到Github的同个工程的source分支下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; git add .
+</span><span class='line'>  &gt;&gt; git commit -m <span class="s2">&quot;Init Octopress&quot;</span>
+</span><span class='line'>  &gt;&gt; git push origin <span class="nb">source</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>注意点</h1>
+
+<h2>zsh引起无法新建Blog的问题</h2>
+
+<p>解决在zsh下无法新建Blog的问题, 具体见参考文档5</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; rake new_post<span class="o">[</span><span class="s2">&quot;arch-linux-reinstall-glibc.markdown&quot;</span><span class="o">]</span>
+</span><span class='line'>  zsh: no matches found: new_post<span class="o">[</span>arch-linux-reinstall-glibc<span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>原因: zsh中若出现 &lsquo;*&rsquo;, &lsquo;(&rsquo;, &lsquo;|&rsquo;, &lsquo;&lt;&rsquo;, &lsquo;[&rsquo;, or &lsquo;?&rsquo; 符号, 则将其识别为查找文件名的通配符
+解决办法:
++ rake &ldquo;new_post[arch-linux-reinstall-glibc.markdown]&rdquo;
++ rake new_post
++ vim .zshrc  添加 alias rake=&ldquo;noglob rake&rdquo;</p>
+
+<h1>参考文档</h1>
+
+<blockquote><ol>
+<li><a href="http://blog.csdn.net/binyao02123202/article/details/20130891">http://blog.csdn.net/binyao02123202/article/details/20130891</a></li>
+<li><a href="http://blog.cnyingchao.com/website/disqus-simplified-chinese.html">http://blog.cnyingchao.com/website/disqus-simplified-chinese.html</a></li>
+<li><a href="http://xuhehuan.com/783.html">http://xuhehuan.com/783.html</a></li>
+<li><a href="http://minejo.github.io/blog/2013/08/09/shi-yong-github-plus-octopresszuo-blog/">http://minejo.github.io/blog/2013/08/09/shi-yong-github-plus-octopresszuo-blog/</a></li>
+<li><a href="http://fancyoung.com/blog/use-octopress-new-post-function-with-zsh/">http://fancyoung.com/blog/use-octopress-new-post-function-with-zsh/</a></li>
+</ol>
+</blockquote>
 </div>
 
 </article>
@@ -173,14 +345,7 @@
 Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
 		</div>
 	</div>
-	<script src="/javascripts/slash.js"></script>
-<script src="/javascripts/jquery.fancybox.pack.js"></script>
-<script type="text/javascript">
-(function($){
-	$('.fancybox').fancybox();
-})(jQuery);
-</script> <!-- Delete or comment this line to disable Fancybox -->
-
+	
 
 <script type="text/javascript">
       var disqus_shortname = 'blog-flower';
@@ -198,6 +363,38 @@ Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Sha
     }());
 </script>
 
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
 
 
 
