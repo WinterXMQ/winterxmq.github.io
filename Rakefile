@@ -14,6 +14,13 @@ deploy_default = "push"
 # This will be configured for you when you run config_deploy
 deploy_branch  = "master"
 
+# Editor_config
+# editor = "open"	         ## 采用系统默认的编辑器
+# editor = "open -a Mou    ## 采用Mou打开
+# editor = "subl"          ## 采用Sublime Text打开
+editor          = "vim"
+
+
 ## -- Misc Configs -- ##
 
 public_dir      = "public"    # compiled site directory
@@ -117,6 +124,9 @@ task :new_post, :title do |t, args|
     post.puts "categories: "
     post.puts "---"
   end
+  if #{editor}
+	  system "#{edit} #{filename}"
+  end
 end
 
 # usage rake new_page[my-new-page] or rake new_page[my-new-page.html] or rake new_page (defaults to "new-page.markdown")
@@ -153,6 +163,9 @@ task :new_page, :filename do |t, args|
       page.puts "footer: true"
       page.puts "---"
     end
+    if #{editor}
+		system "#{edit} #{filename}"
+	end
   else
     puts "Syntax error: #{args.filename} contains unsupported characters"
   end
