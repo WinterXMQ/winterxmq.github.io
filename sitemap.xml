@@ -3,6 +3,22 @@
   
   
   <url>
+    <loc>http://WinterXMQ.github.io/blog/2014/09/28/octopress-new-post-feature-add-p1/</loc>
+    
+    <lastmod>2014-09-28T12:52:34+00:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://WinterXMQ.github.io/blog/2014/09/28/archlinux-install/</loc>
+    
+    <lastmod>2014-09-28T00:08:29+00:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://WinterXMQ.github.io/blog/2014/09/21/github-pages/</loc>
     
     <lastmod>2014-09-21T13:44:02+00:00</lastmod>
@@ -13,21 +29,21 @@
   
   <url>
     <loc>http://WinterXMQ.github.io/</loc>
-    <lastmod>2014-09-27T21:42:01+00:00</lastmod>
+    <lastmod>2014-09-28T13:21:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
     <loc>http://WinterXMQ.github.io/blog/archives/</loc>
-    <lastmod>2014-09-27T21:42:01+00:00</lastmod>
+    <lastmod>2014-09-28T13:21:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://WinterXMQ.github.io/blog/categories/</loc>
-    <lastmod>2014-09-27T21:42:01+00:00</lastmod>
+    <lastmod>2014-09-28T13:21:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

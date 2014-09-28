@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rake | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/rake/atom.xml" rel="self"/>
+  <link href="http://WinterXMQ.github.io/"/>
+  <updated>2014-09-28T13:21:00+00:00</updated>
+  <id>http://WinterXMQ.github.io/</id>
+  <author>
+    <name><![CDATA[WinterXMQ]]></name>
+    <email><![CDATA[WinterXMQ@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress特性设置-新建Blog脚本功能定制]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/09/28/octopress-new-post-feature-add-p1/"/>
+    <updated>2014-09-28T12:52:34+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/09/28/octopress-new-post-feature-add-p1</id>
+    <content type="html"><![CDATA[<h1>新建Blog并自动使用vim打开新建文档</h1>
+
+<p>在使用 <code>rake new_post</code> 或者 <code>rake new_post['title']</code> 后, 需要手动打开新建的Makedown文件, 太过于繁琐
+Octopress是采用Ruby make脚本即rake来完成的, 因此只需要修改Ruby的任务脚本 <code>Rakefile</code> 即可</p>
+
+<p>首先, 现在脚本文件的开头位置定义编辑器</p>
+
+<pre><code class="bash">...
+require "stringex"
+
+# Editor_config
+editor = "vim"
+...
+</code></pre>
+
+<p>然后再每个new_post的任务结尾处加上下述代码</p>
+
+<pre><code class="bash">...
+task :new_post, :title do |t, args|
+...
+  end
+  if #{editor}
+    system "#{editor} #{filename}"
+  end
+end
+...
+</code></pre>
+
+<p>注: new_page任务中也需要同样的设置(虽然还不知道这个任务是干什么的)</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-09-27T21:42:01+00:00</updated>
+  <updated>2014-09-28T13:21:00+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,69 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress特性设置-新建Blog脚本功能定制]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/09/28/octopress-new-post-feature-add-p1/"/>
+    <updated>2014-09-28T12:52:34+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/09/28/octopress-new-post-feature-add-p1</id>
+    <content type="html"><![CDATA[<h1>新建Blog并自动使用vim打开新建文档</h1>
+
+<p>在使用 <code>rake new_post</code> 或者 <code>rake new_post['title']</code> 后, 需要手动打开新建的Makedown文件, 太过于繁琐
+Octopress是采用Ruby make脚本即rake来完成的, 因此只需要修改Ruby的任务脚本 <code>Rakefile</code> 即可</p>
+
+<p>首先, 现在脚本文件的开头位置定义编辑器</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>...
+</span><span class='line'>require <span class="s2">&quot;stringex&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Editor_config</span>
+</span><span class='line'><span class="nv">editor</span> <span class="o">=</span> <span class="s2">&quot;vim&quot;</span>
+</span><span class='line'>...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后再每个new_post的任务结尾处加上下述代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>...
+</span><span class='line'>task :new_post, :title <span class="k">do</span> <span class="p">|</span>t, args<span class="p">|</span>
+</span><span class='line'>...
+</span><span class='line'>  end
+</span><span class='line'>  <span class="k">if</span> <span class="c">#{editor}</span>
+</span><span class='line'>    system <span class="s2">&quot;#{editor} #{filename}&quot;</span>
+</span><span class='line'>  end
+</span><span class='line'>end
+</span><span class='line'>...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注: new_page任务中也需要同样的设置(虽然还不知道这个任务是干什么的)</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ArchLinux-Install]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/09/28/archlinux-install/"/>
+    <updated>2014-09-28T00:08:29+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/09/28/archlinux-install</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[GitHub Pages搭建基于Octopress的Blog]]></title>
