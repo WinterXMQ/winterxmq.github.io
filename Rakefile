@@ -30,6 +30,7 @@ deploy_dir      = "_deploy"   # deploy directory (for Github pages deployment)
 stash_dir       = "_stash"    # directory to stash posts for speedy generation
 posts_dir       = "_posts"    # directory for blog files
 themes_dir      = ".themes"   # directory for blog files
+code_dir        = "p/code"    # directory for code files
 new_post_ext    = "markdown"  # default new post file extension when using the new_post task
 new_page_ext    = "markdown"  # default new page file extension when using the new_page task
 server_port     = "4000"      # port for preview server eg. localhost:4000
@@ -100,6 +101,64 @@ task :preview do
   [jekyllPid, compassPid, rackupPid].each { |pid| Process.wait(pid) }
 end
 
+# usage rake code[name] or rake code['name'] or rake code(default to code)
+# tack for new code files
+desc "Begin a new code file in #{source_dir}/#{code_dir}"
+task :code, :name do |t, args|
+	if args.name
+		name = args.name
+	else
+		name = get_stdin("Enter a filename for your code:")
+	end
+	raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
+	mkdir_p "#{source_dir}/#{code_dir}"
+	filename = "#{source_dir}/#{code_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name}"
+	if File.exist?(filename)
+		abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
+	end
+	puts "Creating new post: #{filename}"
+	if #{editor}
+		system "#{editor} #{filename}"
+	end
+end
+	
+
+
+# usage rake post[name,title] or rake post['name','title'] or rake post[title] or rake post(default to post)
+desc "Begin a new post in #{source_dir}/#{posts_dir}"
+task :post, :name, :title do |t, args|
+	if args.name
+		name = args.name
+	else
+		name = get_stdin("Enter a filename for your post:")
+	end
+	if args.title
+		title = args.title
+	else
+		title = get_stdin("Enter a title for your post:")
+	end
+	raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
+	mkdir_p "#{source_dir}/#{posts_dir}"
+	filename = "#{source_dir}/#{posts_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name.to_url}.#{new_post_ext}"
+	if File.exist?(filename)
+		abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
+	end
+	puts "Creating new post: #{filename}"
+	open(filename, 'w') do |post|
+		post.puts "---"
+		post.puts "layout: post"
+		post.puts "title: \"#{title.gsub(/&/,'&amp;')}\""
+		post.puts "date: #{Time.now.strftime('%Y-%m-%d %H:%M:%S %z')}"
+		post.puts "comments: true"
+		post.puts "categories: "
+		post.puts "---"
+	end
+	if #{editor}
+		system "#{editor} #{filename}"
+	end
+end
+
+
 # usage rake new_post[my-new-post] or rake new_post['my new post'] or rake new_post (defaults to "new-post")
 desc "Begin a new post in #{source_dir}/#{posts_dir}"
 task :new_post, :title do |t, args|
@@ -125,7 +184,7 @@ task :new_post, :title do |t, args|
     post.puts "---"
   end
   if #{editor}
-	  system "#{edit} #{filename}"
+	  system "#{editor} #{filename}"
   end
 end
 
@@ -164,7 +223,7 @@ task :new_page, :filename do |t, args|
       page.puts "---"
     end
     if #{editor}
-		system "#{edit} #{filename}"
+		system "#{editor} #{filename}"
 	end
   else
     puts "Syntax error: #{args.filename} contains unsupported characters"
