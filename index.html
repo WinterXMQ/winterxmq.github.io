@@ -178,6 +178,84 @@ Octopress是采用Ruby make脚本即rake来完成的, 因此只需要修改Ruby�
 
 <p>注: new_page任务中也需要同样的设置(虽然还不知道这个任务是干什么的)</p>
 
+<h1>新建Blog时支持文件名和Blog的title分离</h1>
+
+<p>在Octopress中写Blog, 时常会出现新建完Blog后还要去修改Title, 虽然没有什么问题, 但总需要这么做就显得有点麻烦, 按照Octopress管理Blog的形式在Rake的任务脚本中自定义Rake任务, 自定义过程如下</p>
+
+<p>这个任务与普通的new_post任务差别不大, 主要在于接受的参数多了一个, 此外在创建文件的文件名和写入文件的title名有区别而已, 在Rakefile中加入如下代码</p>
+
+<figure class='code'><figcaption><span>post.rb  (2014-10-03-new-post-add-post.rb)</span> <a href='/p/code/2014-10-03-new-post-add-post.rb'>download</a></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">usage</span> <span class="n">rake</span> <span class="n">post</span><span class="o">[</span><span class="nb">name</span><span class="p">,</span><span class="n">title</span><span class="o">]</span> <span class="ow">or</span> <span class="n">rake</span> <span class="n">post</span><span class="o">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;title&#39;</span><span class="o">]</span> <span class="ow">or</span> <span class="n">rake</span> <span class="n">post</span><span class="o">[</span><span class="n">title</span><span class="o">]</span> <span class="ow">or</span> <span class="n">rake</span> <span class="n">post</span><span class="p">(</span><span class="n">default</span> <span class="n">to</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Begin a new post in </span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="n">task</span> <span class="ss">:post</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:title</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">get_stdin</span><span class="p">(</span><span class="s2">&quot;Enter a filename for your post:&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">get_stdin</span><span class="p">(</span><span class="s2">&quot;Enter a title for your post:&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="nb">name</span><span class="o">.</span><span class="n">to_url</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">new_post_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Creating new post: </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;---&quot;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;layout: post&quot;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;title: </span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/&amp;/</span><span class="p">,</span><span class="s1">&#39;&amp;amp;&#39;</span><span class="p">)</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;date: </span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d %H:%M:%S %z&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;comments: true&quot;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;categories: &quot;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;---&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
+</span><span class='line'>    <span class="nb">system</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
 		
 		
 	</div>
