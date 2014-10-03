@@ -4,20 +4,20 @@ require "stringex"
 
 ## -- Rsync Deploy config -- ##
 # Be sure your public key is listed in your server's ~/.ssh/authorized_keys file
-ssh_user       = "user@domain.com"
-ssh_port       = "22"
-document_root  = "~/website.com/"
-rsync_delete   = false
-rsync_args     = ""  # Any extra arguments to pass to rsync
-deploy_default = "push"
+ssh_user        = "user@domain.com"
+ssh_port        = "22"
+document_root   = "~/website.com/"
+rsync_delete    = false
+rsync_args      = ""          # Any extra arguments to pass to rsync
+deploy_default  = "push"
 
 # This will be configured for you when you run config_deploy
-deploy_branch  = "master"
+deploy_branch   = "master"
 
 # Editor_config
-# editor = "open"	         ## 采用系统默认的编辑器
-# editor = "open -a Mou    ## 采用Mou打开
-# editor = "subl"          ## 采用Sublime Text打开
+# editor = "open"             # 采用系统默认的编辑器
+# editor = "open -a Mou       # 采用Mou打开
+# editor = "subl"             # 采用Sublime Text打开
 editor          = "vim"
 
 
@@ -105,57 +105,57 @@ end
 # tack for new code files
 desc "Begin a new code file in #{source_dir}/#{code_dir}"
 task :code, :name do |t, args|
-	if args.name
-		name = args.name
-	else
-		name = get_stdin("Enter a filename for your code:")
-	end
-	raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
-	mkdir_p "#{source_dir}/#{code_dir}"
-	filename = "#{source_dir}/#{code_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name}"
-	if File.exist?(filename)
-		abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
-	end
-	puts "Creating new post: #{filename}"
-	if #{editor}
-		system "#{editor} #{filename}"
-	end
+  if args.name
+    name = args.name
+  else
+    name = get_stdin("Enter a filename for your code:")
+  end
+  raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
+  mkdir_p "#{source_dir}/#{code_dir}"
+  filename = "#{source_dir}/#{code_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name}"
+  if File.exist?(filename)
+    abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
+  end
+  puts "Creating new post: #{filename}"
+  if #{editor}
+    system "#{editor} #{filename}"
+  end
 end
-	
+  
 
 
 # usage rake post[name,title] or rake post['name','title'] or rake post[title] or rake post(default to post)
 desc "Begin a new post in #{source_dir}/#{posts_dir}"
 task :post, :name, :title do |t, args|
-	if args.name
-		name = args.name
-	else
-		name = get_stdin("Enter a filename for your post:")
-	end
-	if args.title
-		title = args.title
-	else
-		title = get_stdin("Enter a title for your post:")
-	end
-	raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
-	mkdir_p "#{source_dir}/#{posts_dir}"
-	filename = "#{source_dir}/#{posts_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name.to_url}.#{new_post_ext}"
-	if File.exist?(filename)
-		abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
-	end
-	puts "Creating new post: #{filename}"
-	open(filename, 'w') do |post|
-		post.puts "---"
-		post.puts "layout: post"
-		post.puts "title: \"#{title.gsub(/&/,'&amp;')}\""
-		post.puts "date: #{Time.now.strftime('%Y-%m-%d %H:%M:%S %z')}"
-		post.puts "comments: true"
-		post.puts "categories: "
-		post.puts "---"
-	end
-	if #{editor}
-		system "#{editor} #{filename}"
-	end
+  if args.name
+    name = args.name
+  else
+    name = get_stdin("Enter a filename for your post:")
+  end
+  if args.title
+    title = args.title
+  else
+    title = get_stdin("Enter a title for your post:")
+  end
+  raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
+  mkdir_p "#{source_dir}/#{posts_dir}"
+  filename = "#{source_dir}/#{posts_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name.to_url}.#{new_post_ext}"
+  if File.exist?(filename)
+    abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
+  end
+  puts "Creating new post: #{filename}"
+  open(filename, 'w') do |post|
+    post.puts "---"
+    post.puts "layout: post"
+    post.puts "title: \"#{title.gsub(/&/,'&amp;')}\""
+    post.puts "date: #{Time.now.strftime('%Y-%m-%d %H:%M:%S %z')}"
+    post.puts "comments: true"
+    post.puts "categories: "
+    post.puts "---"
+  end
+  if #{editor}
+    system "#{editor} #{filename}"
+  end
 end
 
 
@@ -184,7 +184,7 @@ task :new_post, :title do |t, args|
     post.puts "---"
   end
   if #{editor}
-	  system "#{editor} #{filename}"
+    system "#{editor} #{filename}"
   end
 end
 
@@ -223,8 +223,8 @@ task :new_page, :filename do |t, args|
       page.puts "---"
     end
     if #{editor}
-		system "#{editor} #{filename}"
-	end
+      system "#{editor} #{filename}"
+    end
   else
     puts "Syntax error: #{args.filename} contains unsupported characters"
   end
@@ -324,7 +324,7 @@ desc "deploy public directory to github pages"
 multitask :push do
   puts "## Deploying branch to Github Pages "
   puts "## Pulling any updates from Github Pages "
-  cd "#{deploy_dir}" do 
+  cd "#{deploy_dir}" do
     Bundler.with_clean_env { system "git pull" }
   end
   (Dir["#{deploy_dir}/*"]).each { |f| rm_rf(f) }
