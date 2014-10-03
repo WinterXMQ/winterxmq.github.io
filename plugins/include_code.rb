@@ -42,7 +42,11 @@ module Jekyll
     end
 
     def render(context)
-      code_dir = (context.registers[:site].config['code_dir'].sub(/^\//,'') || 'downloads/code')
+      default_dir = 'p/code'
+      code_dir = (context.registers[:site].config['code_dir'].sub(/^\//,'') || default_dir)
+      if @file.start_with?(code_dir)
+        @file = @file[code_dir.length + 1, @file.length - 1]
+      end
       code_path = (Pathname.new(context.registers[:site].source) + code_dir).expand_path
       file = code_path + @file
 
