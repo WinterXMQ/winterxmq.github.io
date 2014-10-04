@@ -112,17 +112,23 @@ task :code, :name do |t, args|
   end
   raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
   mkdir_p "#{source_dir}/#{code_dir}"
-  filename = "#{source_dir}/#{code_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{name}"
+  basicname = "#{Time.now.strftime('%Y-%m-%d')}-#{name}"
+  filename = "#{source_dir}/#{code_dir}/#{basicname}"
   if File.exist?(filename)
     abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
-  puts "Creating new post: #{filename}"
   if #{editor}
     system "#{editor} #{filename}"
   end
+  if File.exist?(filename)
+    puts "Created new post: #{filename}"
+    puts "{% include_code [filename] lang:Language #{basicname} %}"
+    puts "  or  {% include_code [filename] lang:Language #{code_dir}/#{basicname} %}"
+    puts "  can be used in blog markdown files."
+  else
+    puts "File is canceled."
+  end
 end
-  
-
 
 # usage rake post[name,title] or rake post['name','title'] or rake post[title] or rake post(default to post)
 desc "Begin a new post in #{source_dir}/#{posts_dir}"
