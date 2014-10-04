@@ -4,7 +4,7 @@
   <title><![CDATA[Category: blog | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/blog/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-10-03T15:24:29+00:00</updated>
+  <updated>2014-10-04T06:08:09+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -20,8 +20,11 @@
     <id>http://WinterXMQ.github.io/blog/2014/09/28/octopress-new-post-feature-add-p1</id>
     <content type="html"><![CDATA[<h1>新建Blog并自动使用vim打开新建文档</h1>
 
-<p>在使用 <code>rake new_post</code> 或者 <code>rake new_post['title']</code> 后, 需要手动打开新建的Makedown文件, 太过于繁琐
-Octopress是采用Ruby make脚本即rake来完成的, 因此只需要修改Ruby的任务脚本 <code>Rakefile</code> 即可</p>
+<hr />
+
+<p>在使用 <code>rake new_post</code> 或者 <code>rake new_post['title']</code> 后, 需要手动打开新建的Makedown文件, 太过于繁琐</p>
+
+<p>Octopress是采用Ruby make脚本即rake来完成的, 因此只需要修改Ruby的任务脚本 <code>Rakefile</code> 即可</p>
 
 <p>首先, 现在脚本文件的开头位置定义编辑器</p>
 
@@ -49,6 +52,8 @@ end
 <p>注: new_page任务中也需要同样的设置(虽然还不知道这个任务是干什么的)</p>
 
 <h1>新建Blog时支持文件名和Blog的title分离</h1>
+
+<hr />
 
 <p>在Octopress中写Blog, 时常会出现新建完Blog后还要去修改Title, 虽然没有什么问题, 但总需要这么做就显得有点麻烦, 按照Octopress管理Blog的形式在Rake的任务脚本中自定义Rake任务, 自定义过程如下</p>
 
@@ -119,6 +124,103 @@ end
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
 </span><span class='line'>    <span class="nb">system</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<h1>增加自动新建Code的任务</h1>
+
+<hr />
+
+<p>Octopress总有新建Blog的任务, 当需要在Blog中插入大段代码时却需要手动新建代码文件, 略微显得有些蛋疼, 于是创建了这个任务</p>
+
+<p>Octopress中有 <code>include_code</code> 的功能, 而此次为Octopress增加的 <code>新建 Code</code> 的任务也是为了这个功能设置的</p>
+
+<h2>小幅修改 include_code</h2>
+
+<p>在 <code>include_code</code> 中只需要给出Code文件的文件名, 系统会在预先设定的源码文件夹中寻找文件</p>
+
+<p>因此, 第一点要修改源码的默认路径&lt;什么文件都要放在download下, 你不觉得很失败吗></p>
+
+<p>此处需要修改两个地方: 1) 站点配置文件 <code>_config.yml</code> 下的 <code>code_dir</code> 2) <code>include_code</code>功能的代码生成器 <code>plugins\include_code.rb</code>中的相关设定</p>
+
+<p>1) 对于这个没有什么好说明的, 只需要打开 <code>_config.yml</code>, 修改 <code>code_dir: p/code</code>, 唯一的<strong>注意点</strong>: 目录的前后都不要有 <code>/</code></p>
+
+<p>2) 需要替换 <code>plugins\include_code.rb</code> 中关于 <code>code_dir</code> 的默认设定</p>
+
+<pre><code class="ruby">default_dir = 'p/code'
+# code_dir = (context.registers[:site].config['code_dir'].sub(/^\//,'') || 'dowanload/code')
+code_dir = (context.registers[:site].config['code_dir'].sub(/^\//,'') || default_dir)
+</code></pre>
+
+<p>此外, 个人觉得在这个功能中只给出文件名有些不好, 因此就增加了同样支持给出完整的相对路径, 如 <code>p/code/filename</code>&lt;纯属蛋疼></p>
+
+<p>在 <code>plugins\include_code.rb</code> 中修改如下代码&lt;紧接着上面的代码></p>
+
+<pre><code class="ruby">if @file.start_with?(code_dir)
+  @file = @file[code_dir.length + 1, @file.length - 1]
+end
+</code></pre>
+
+<h2>增加Rake任务 Code</h2>
+
+<p>完成了对 <code>include_code</code> 的改造, 紧接着要完成最重要的内容, 即新增任务, 在 <code>Rakefile</code> 中增加如下内容</p>
+
+<p><figure class='code'><figcaption><span>new-code.rb  (2014-10-04-new-post-new-code.rb)</span> <a href='/p/code/2014-10-04-new-post-new-code.rb'>download</a></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># usage rake code[name] or rake code[&#39;name&#39;] or rake code(default to code)</span>
+</span><span class='line'><span class="c1"># tack for new code files</span>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Begin a new code file in </span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="n">task</span> <span class="ss">:code</span><span class="p">,</span> <span class="ss">:name</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">get_stdin</span><span class="p">(</span><span class="s2">&quot;Enter a filename for your code:&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">basicname</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">basicname</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
+</span><span class='line'>    <span class="nb">system</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Created new post: </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;{% include_code [filename] lang:Language </span><span class="si">#{</span><span class="n">basicname</span><span class="si">}</span><span class="s2"> %}&quot;</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;  or  {% include_code [filename] lang:Language </span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">basicname</span><span class="si">}</span><span class="s2"> %}&quot;</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;  can be used in blog markdown files.&quot;</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;File is canceled.&quot;</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure></p>
