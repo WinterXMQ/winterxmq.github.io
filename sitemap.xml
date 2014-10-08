@@ -3,6 +3,14 @@
   
   
   <url>
+    <loc>http://WinterXMQ.github.io/blog/2014/10/08/html-print-media/</loc>
+    
+    <lastmod>2014-10-08T12:41:20+00:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://WinterXMQ.github.io/blog/2014/10/06/vbox-linux-file-share/</loc>
     
     <lastmod>2014-10-06T06:36:11+00:00</lastmod>
@@ -37,21 +45,21 @@
   
   <url>
     <loc>http://WinterXMQ.github.io/blog/archives/</loc>
-    <lastmod>2014-10-06T10:07:28+00:00</lastmod>
+    <lastmod>2014-10-08T14:09:28+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://WinterXMQ.github.io/</loc>
-    <lastmod>2014-10-06T10:07:28+00:00</lastmod>
+    <lastmod>2014-10-08T14:09:28+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
     <loc>http://WinterXMQ.github.io/blog/categories/</loc>
-    <lastmod>2014-10-06T10:07:28+00:00</lastmod>
+    <lastmod>2014-10-08T14:09:28+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
