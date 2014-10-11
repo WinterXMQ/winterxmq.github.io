@@ -3,6 +3,14 @@
   
   
   <url>
+    <loc>http://WinterXMQ.github.io/blog/2014/10/11/debian-vpn/</loc>
+    
+    <lastmod>2014-10-11T10:37:11+00:00</lastmod>
+    
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://WinterXMQ.github.io/blog/2014/10/11/server-debian-setup/</loc>
     
     <lastmod>2014-10-11T08:56:17+00:00</lastmod>
@@ -53,21 +61,21 @@
   
   <url>
     <loc>http://WinterXMQ.github.io/blog/archives/</loc>
-    <lastmod>2014-10-11T09:54:38+00:00</lastmod>
+    <lastmod>2014-10-11T15:20:27+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://WinterXMQ.github.io/</loc>
-    <lastmod>2014-10-11T09:54:38+00:00</lastmod>
+    <lastmod>2014-10-11T15:20:27+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
   <url>
     <loc>http://WinterXMQ.github.io/blog/categories/</loc>
-    <lastmod>2014-10-11T09:54:38+00:00</lastmod>
+    <lastmod>2014-10-11T15:20:27+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
