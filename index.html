@@ -9,7 +9,7 @@
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="debian, linux, pptp, vpn Comments Debian上开启VPN(PPTP)服务 有了纽约的服务器貌似必须开启代理模式, 虽然ShadowSocks要比VPN好多了, 但毕竟需要额外的软件或者额外的硬件, 而VPN的客户端却是各种平台上预先搭载的, &hellip;">
+	<meta name="description" content="debian, linux, proxy, shadowsocks Comments Debian上搭建ShadowSocks服务 在DigitalOcean上搭建好Droplet后的第一件事就是搭建ShadowSocks服务, 用ShadowSocks翻墙时最受不了的就是服务器失效, &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,6 +101,252 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-15T11:46:04+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/debian/'>debian</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/proxy/'>proxy</a>, <a class='category' href='/blog/categories/shadowsocks/'>shadowsocks</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/10/15/debian-shadowsocks/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/10/15/debian-shadowsocks/" itemprop="url">Debian上搭建ShadowSocks服务</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>在DigitalOcean上搭建好Droplet后的第一件事就是搭建ShadowSocks服务, 用ShadowSocks翻墙时最受不了的就是服务器失效, 所以最靠谱的就是自己搭建一个</p>
+
+<p>采用ShadowSocks的libev版本, 这个版本的特点是内存占用小(600k左右),使用libev和C编写，低CPU消耗，甚至可以安装在基于OpenWRT的路由器上<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
+
+<p>这篇博客有借鉴价值, 对于Debian、Ubuntu、Arch等意义并不大, 这个发行版都有源</p>
+
+<h1>Install</h1>
+
+<p>关于之前提到的三个发行版(Debian, Ubuntu, Arch), Debian和Ubuntu的情况差不多, 不过Ubuntu已经很久不玩了, 也不清楚什么状况, Arch相关的安装配置以后补上</p>
+
+<h2>Debian源的配置</h2>
+
+<p>ShadowSocks不在官方源里, 需要额外配置<sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /etc/apt/sources.list
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>按照系统的版本增加源, Debian Wheezy指的是Debian 7</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># Debian Wheezy, Ubuntu 12.04 or any distribution with libssl &gt; 1.0.1</span>
+</span><span class='line'>deb http://shadowsocks.org/debian wheezy main
+</span><span class='line'>
+</span><span class='line'><span class="c"># Debian Squeeze, Ubuntu 11.04, or any distribution with libssl &gt; 0.9.8, but &lt; 1.0.0</span>
+</span><span class='line'>deb http://shadowsocks.org/debian squeeze main
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>增加完后更新缓存</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo apt-get update
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Install &amp;&amp; Configure &amp;&amp; Start Service</h2>
+
+<blockquote><p>Debian</p></blockquote>
+
+<p>采用如下命令安装shadowsocks-libev</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo apt-get install shadowsocks
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完后, 编辑配置文件, 设定监听地址、端口、密码以及加密方式, 然后启动服务</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># Edit the configuration</span>
+</span><span class='line'>&gt;&gt; sudo vim /etc/shadowsocks/config.json
+</span><span class='line'>
+</span><span class='line'><span class="c"># Start the service</span>
+</span><span class='line'>&gt;&gt; sudo /etc/init.d/shadowsocks start
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>检测</h2>
+
+<p>通过如下命令检测服务是否开启</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; ps -ef <span class="p">|</span> grep ss-server <span class="p">|</span> grep -v ps <span class="p">|</span> grep -v grep
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以检测端口是否被监听来判断</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; netstat -antl
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Configure</h1>
+
+<h2>General</h2>
+
+<p>配置文件的内容如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;server&quot;</span>:<span class="s2">&quot;my_server_ip&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;server_port&quot;</span>:8388,
+</span><span class='line'>    <span class="s2">&quot;local_address&quot;</span>: <span class="s2">&quot;127.0.0.1&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;local_port&quot;</span>:1080,
+</span><span class='line'>    <span class="s2">&quot;password&quot;</span>:<span class="s2">&quot;mypassword&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;timeout&quot;</span>:300,
+</span><span class='line'>    <span class="s2">&quot;method&quot;</span>:<span class="s2">&quot;aes-256-cfb&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;fast_open&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;workers&quot;</span>: 1
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中 <code>server</code> 是ShadowSocks监听的ip, 一般设置成服务器的公网IP; <code>server_port</code> 是ShadowSocks监听的端口, 据说拉低端口号会提高速度, 有一些人比较极端的会设置成443(https的端口); <code>password</code> 应该不用说了; <code>method</code> ShadooSocks支持很多中加密方式, 有些安全但速度比较慢, 有些不太安全但速度快, 看你怎么选择<sup id="fnref:3"><a href="#fn:3" rel="footnote">3</a></sup></p>
+
+<h2>IPV4 And IPV6</h2>
+
+<p>因为在学校里有IPV6的环境, 方便在没有网络的时候可以采用IPV6来上网</p>
+
+<p>如果把 <code>server</code> 设置成服务器的公网IP, 那就只能适用IPV4连接, 如果设置成服务器的IPV6地址, 那就只能IPV6连接, 为此还查了一番, 这个问题比较好解决, 按照这样设置即可 <code>"server": "::"</code></p>
+
+<p>如此设置时的确可以完成同时响应IPV4和IPV6, 但是在查看端口监听的时候只能发现程序监听了IPV6</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; netstat -antl <span class="p">|</span> grep <span class="s2">&quot;server_port&quot;</span>
+</span><span class='line'>tcp6       <span class="m">0</span>      <span class="m">0</span> :::2299                 :::*                    LISTEN
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>统计流量</h2>
+
+<p>由于我希望同时监听IPV4和IPV6, 而接下来要介绍的方法我不敢保证是否支持这一特性, 同时我也暂时没有时间, 因此没有测试, 仅供参考, 来自于<a href="http://yzs.me/"></a>的<a href="http://yzs.me/2230.html">利用IPTABLES对Shadowsocks统计流量</a></p>
+
+<p>原理: ShadowSocks监听内网地址, 通过iptables的网络转发功能把数据转发到内网地址上来实现</p>
+
+<p>1) 添加一个loop back用的内网IP</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; ifconfig eth0:ss1 10.10.10.10 netmask 255.255.255.0 up
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>注意:</strong></p>
+
+<ol>
+<li><p>网卡名不是eth0的自己修改</p></li>
+<li><p>以这种形式增加的内网地址在重启后会失效, 可以修改网卡的配置文件(/etc/network/interfaces或/etc/sysconfig/network-scripts/)添加IP，或者把添加IP的命令加到/etc/rc.local里面</p></li>
+</ol>
+
+
+<p>2) 修改ShadowSocks监听的网络, 并重启 <code>sudo service shadowsocks restart</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="s2">&quot;server&quot;</span>:<span class="s2">&quot;10.10.10.10&quot;</span>,
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3) 开启系统的IPV4转发功能</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /etc/sysctl.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确保 <code>net.ipv4.ip_forward = 1</code> 前没有 <code>#</code></p>
+
+<p>如果有修改, 执行 <code>sudo sysctl -p</code> 使之生效</p>
+
+<p>4) iptables 设置转发</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; iptables -t nat -I PREROUTING -p tcp --dport SERVER_PORT -j DNAT --to-destination 10.10.10.10
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>5) 设置统计流量</p>
+
+<p>统计内网地址的入网和出网的流量</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; iptables -I INPUT -d 10.10.10.10
+</span><span class='line'>&gt;&gt; iptables -I OUTPUT -s 10.10.10.10
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查询流量</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; iptables -L -n -v
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>注意:</strong></p>
+
+<p>这样设置无法清空10.10.10.10的统计数据, 解决办法: 因为加入到FORWARD里面了，不能直接-Z，否则会全部清零，如果要清零单条，最好创建另一个链，把这个记录加入那个链中，再把那个链加入FORWARD中，清零是直接iptables -Z 链名称就行了</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>参考自<a href="http://teddysun.com/">秋水逸冰</a>的<a href="http://teddysun.com/358.html">Debian下shadowsocks-libev一键安装脚本</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<li id="fn:2">
+<p>参考自<a href="https://github.com/madeye/shadowsocks-libev">ShadowSocks-libev</a>的<a href="https://github.com/madeye/shadowsocks-libev#install-from-repository">Install from repository</a>, 包括两份版本的Debian和Ubuntu的源<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+<li id="fn:3">
+<p>参考自<a href="https://github.com/clowwindy/shadowsocks#configuration">shadowsocks-libev作者的Github</a>, 里面有具体的说明<a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
