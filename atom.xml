@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-10-15T13:02:39+00:00</updated>
+  <updated>2014-10-28T07:09:11+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,117 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ArchLinux上搭建LAMP环境]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/10/28/lamp/"/>
+    <updated>2014-10-28T05:37:56+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/10/28/lamp</id>
+    <content type="html"><![CDATA[<p>为了给基于Discuz模板的BBS增加一个小功能而在本地ArchLinux虚拟机里搭建一个BBS的测试平台</p>
+
+<h1>Apache And PHP Installation</h1>
+
+<p>分别安装 apache php 和 php-apache组件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo pacman -S apache php php-apache
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动 apache, <code>sudo systemctl start httpd</code></p>
+
+<p>测试 php 环境</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /srv/http/info.php
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在文件中写下如下信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span> <span class="nb">phpinfo</span><span class="p">();</span> <span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>打开网页测试效果</p>
+
+<p>测试结果未生效, 在 apache 中启用 php</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /etc/httpd/conf/httpd.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查找 <code>LoadModule dir_module modules/mod_dir.so</code> 下增加</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>LoadModule php5_module modules/libphp5.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同时在 <code>Include</code> 列表末尾增加</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Include conf/extra/php5_module.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于在 ArchLinux 中 php-apache 下的 libphp5.so 无法和 mod_mpm_event 一起工作, 会有如下错误</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Apache is running a threaded MPM, but your PHP Module is not compiled to be threadsafe.  You need to recompile PHP.
+</span><span class='line'>AH00013: Pre-configuration failed
+</span><span class='line'>httpd.service: control process exited, <span class="nv">code</span><span class="o">=</span>exited <span class="nv">status</span><span class="o">=</span>1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>有如下两种解决办法:</p>
+
+<p>1) 对 apache php 等重新编译, 启用 thread safety(没试过)</p>
+
+<p>2) 采用替换方法</p>
+
+<p>使用 mod_mpm_prefork, 打开 <code>/etc/httpd/conf/httpd.conf</code>, 把</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>LoadModule mpm_event_module modules/mod_mpm_event.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>替换成</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启 apache, <code>sudo systemctl restart httpd</code>, 打开网页测试 <code>info.php</code> 页面, 看到如下画面说明 PHP 启用成功</p>
+
+<p><img src="http://img.vim-cn.com/85/64208227801a398d079fc7e0ffbb874a2e3241.jpg" alt="PHPinfo" /></p>
+
+<h1>Mysql or MariaDB Installation</h1>
+
+<p>安装 Mysql/MariaDB, <code>sudo pacman -S mysql</code></p>
+
+<p>启用 pdo_mysql.so 和 mysqli.so, 打开 <code>sudo vim /etc/php/php.ini</code>, 分别去掉如下两条配置的注释符</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">extension</span><span class="o">=</span>pdo_mysql.so
+</span><span class='line'><span class="nv">extension</span><span class="o">=</span>mysqli.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>目前的配置到此结束。</p>
+
+<h1>参考文献</h1>
+
+<p><a href="https://wiki.archlinux.org/index.php/Apache">https://wiki.archlinux.org/index.php/Apache</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Debian上搭建ShadowSocks服务]]></title>

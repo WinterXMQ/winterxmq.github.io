@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mysql | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/mysql/atom.xml" rel="self"/>
+  <link href="http://WinterXMQ.github.io/"/>
+  <updated>2014-10-28T07:09:11+00:00</updated>
+  <id>http://WinterXMQ.github.io/</id>
+  <author>
+    <name><![CDATA[WinterXMQ]]></name>
+    <email><![CDATA[WinterXMQ@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ArchLinux上搭建LAMP环境]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/10/28/lamp/"/>
+    <updated>2014-10-28T05:37:56+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/10/28/lamp</id>
+    <content type="html"><![CDATA[<p>为了给基于Discuz模板的BBS增加一个小功能而在本地ArchLinux虚拟机里搭建一个BBS的测试平台</p>
+
+<h1>Apache And PHP Installation</h1>
+
+<p>分别安装 apache php 和 php-apache组件</p>
+
+<pre><code class="bash">&gt;&gt; sudo pacman -S apache php php-apache
+</code></pre>
+
+<p>启动 apache, <code>sudo systemctl start httpd</code></p>
+
+<p>测试 php 环境</p>
+
+<pre><code class="bash">&gt;&gt; sudo vim /srv/http/info.php
+</code></pre>
+
+<p>在文件中写下如下信息</p>
+
+<pre><code class="php">&lt;?php phpinfo(); ?&gt;
+</code></pre>
+
+<p>打开网页测试效果</p>
+
+<p>测试结果未生效, 在 apache 中启用 php</p>
+
+<pre><code class="bash">&gt;&gt; sudo vim /etc/httpd/conf/httpd.conf
+</code></pre>
+
+<p>查找 <code>LoadModule dir_module modules/mod_dir.so</code> 下增加</p>
+
+<pre><code class="bash">LoadModule php5_module modules/libphp5.so
+</code></pre>
+
+<p>同时在 <code>Include</code> 列表末尾增加</p>
+
+<pre><code class="bash">Include conf/extra/php5_module.conf
+</code></pre>
+
+<p>由于在 ArchLinux 中 php-apache 下的 libphp5.so 无法和 mod_mpm_event 一起工作, 会有如下错误</p>
+
+<pre><code class="bash">Apache is running a threaded MPM, but your PHP Module is not compiled to be threadsafe.  You need to recompile PHP.
+AH00013: Pre-configuration failed
+httpd.service: control process exited, code=exited status=1
+</code></pre>
+
+<p>有如下两种解决办法:</p>
+
+<p>1) 对 apache php 等重新编译, 启用 thread safety(没试过)</p>
+
+<p>2) 采用替换方法</p>
+
+<p>使用 mod_mpm_prefork, 打开 <code>/etc/httpd/conf/httpd.conf</code>, 把</p>
+
+<pre><code class="bash">LoadModule mpm_event_module modules/mod_mpm_event.so
+</code></pre>
+
+<p>替换成</p>
+
+<pre><code class="bash">LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+</code></pre>
+
+<p>重启 apache, <code>sudo systemctl restart httpd</code>, 打开网页测试 <code>info.php</code> 页面, 看到如下画面说明 PHP 启用成功</p>
+
+<p><img src="http://img.vim-cn.com/85/64208227801a398d079fc7e0ffbb874a2e3241.jpg" alt="PHPinfo" /></p>
+
+<h1>Mysql or MariaDB Installation</h1>
+
+<p>安装 Mysql/MariaDB, <code>sudo pacman -S mysql</code></p>
+
+<p>启用 pdo_mysql.so 和 mysqli.so, 打开 <code>sudo vim /etc/php/php.ini</code>, 分别去掉如下两条配置的注释符</p>
+
+<pre><code class="bash">extension=pdo_mysql.so
+extension=mysqli.so
+</code></pre>
+
+<p>目前的配置到此结束。</p>
+
+<h1>参考文献</h1>
+
+<p><a href="https://wiki.archlinux.org/index.php/Apache">https://wiki.archlinux.org/index.php/Apache</a></p>
+]]></content>
+  </entry>
+  
+</feed>
