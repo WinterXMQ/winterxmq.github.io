@@ -1,0 +1,108 @@
+---
+layout: post
+title: "ArchLinux上搭建LAMP环境"
+date: 2014-10-28 05:37:56 +0000
+comments: true
+categories: Linux ArchLinux apache mysql MariaDB PHP
+---
+
+为了给基于Discuz模板的BBS增加一个小功能而在本地ArchLinux虚拟机里搭建一个BBS的测试平台
+
+# Apache And PHP Installation
+
+分别安装 apache php 和 php-apache组件
+
+```bash
+>> sudo pacman -S apache php php-apache
+
+```
+
+启动 apache, `sudo systemctl start httpd`
+
+测试 php 环境
+
+```bash
+>> sudo vim /srv/http/info.php
+
+```
+
+在文件中写下如下信息
+
+```php
+<?php phpinfo(); ?>
+
+```
+
+打开网页测试效果
+
+测试结果未生效, 在 apache 中启用 php
+
+```bash
+>> sudo vim /etc/httpd/conf/httpd.conf
+
+```
+
+查找 `LoadModule dir_module modules/mod_dir.so` 下增加
+
+```bash
+LoadModule php5_module modules/libphp5.so
+
+```
+
+同时在 `Include` 列表末尾增加
+
+```bash
+Include conf/extra/php5_module.conf
+
+```
+
+由于在 ArchLinux 中 php-apache 下的 libphp5.so 无法和 mod_mpm_event 一起工作, 会有如下错误
+
+```bash
+Apache is running a threaded MPM, but your PHP Module is not compiled to be threadsafe.  You need to recompile PHP.
+AH00013: Pre-configuration failed
+httpd.service: control process exited, code=exited status=1
+
+```
+
+有如下两种解决办法:
+
+1) 对 apache php 等重新编译, 启用 thread safety(没试过)
+
+2) 采用替换方法
+
+使用 mod_mpm_prefork, 打开 `/etc/httpd/conf/httpd.conf`, 把
+
+```bash
+LoadModule mpm_event_module modules/mod_mpm_event.so
+
+```
+
+替换成
+
+```bash
+LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+
+```
+
+重启 apache, `sudo systemctl restart httpd`, 打开网页测试 `info.php` 页面, 看到如下画面说明 PHP 启用成功
+
+![PHPinfo](http://img.vim-cn.com/85/64208227801a398d079fc7e0ffbb874a2e3241.jpg)
+
+# Mysql or MariaDB Installation
+
+安装 Mysql/MariaDB, `sudo pacman -S mysql`
+
+启用 pdo_mysql.so 和 mysqli.so, 打开 `sudo vim /etc/php/php.ini`, 分别去掉如下两条配置的注释符
+
+```bash
+extension=pdo_mysql.so
+extension=mysqli.so
+
+```
+
+目前的配置到此结束。
+
+# 参考文献
+
+https://wiki.archlinux.org/index.php/Apache
