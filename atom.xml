@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-10-28T07:09:11+00:00</updated>
+  <updated>2014-11-03T06:48:42+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,370 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Linux中的正则表达式]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/10/31/shell-regular/"/>
+    <updated>2014-10-31T12:18:44+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/10/31/shell-regular</id>
+    <content type="html"><![CDATA[<p>POSIX<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> 定义了两种正则表达式语法:</p>
+
+<p>1) BRE 基本正则表达式(Basic Regular Expression);</p>
+
+<p>2) ERE 扩展的正则表达式(Extended Regular Expression)</p>
+
+<p>大多数的Linux程序符合BRE规则</p>
+
+<p><code>sed</code> 只支持大部分 BRE, 因为主要是受到速度的限制;</p>
+
+<p><code>grep</code> 可以支持 ERE, 只是需要增加额外参数 <code>-E</code></p>
+
+<p><code>gwak</code> 使用 BRE</p>
+
+<h1>Regular Expression 中的基本字符集</h1>
+
+<p>BRE定义语法符号</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">符号    </th>
+<th style="text-align:left;"> 模式含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">. </td>
+<td style="text-align:left;"> 匹配任何一个字符</td>
+</tr>
+<tr>
+<td style="text-align:left;">[] </td>
+<td style="text-align:left;"> 字符集匹配</td>
+</tr>
+<tr>
+<td style="text-align:left;">[^] </td>
+<td style="text-align:left;"> 字符集(取反)匹配</td>
+</tr>
+<tr>
+<td style="text-align:left;">^ </td>
+<td style="text-align:left;"> 匹配开始位置</td>
+</tr>
+<tr>
+<td style="text-align:left;">$ </td>
+<td style="text-align:left;"> 匹配结束位置</td>
+</tr>
+<tr>
+<td style="text-align:left;">() </td>
+<td style="text-align:left;"> 定义子表达式</td>
+</tr>
+<tr>
+<td style="text-align:left;">\n </td>
+<td style="text-align:left;"> 子表达式向前引用, 即表示重复, n在{1,9}之间</td>
+</tr>
+<tr>
+<td style="text-align:left;">* </td>
+<td style="text-align:left;"> 多次或者重复匹配(包括0次重复)</td>
+</tr>
+<tr>
+<td style="text-align:left;">\ </td>
+<td style="text-align:left;"> 转义符</td>
+</tr>
+<tr>
+<td style="text-align:left;">[] </td>
+<td style="text-align:left;"> 匹配括号内出现的字符, 如 [a-zA-Z0123]</td>
+</tr>
+<tr>
+<td style="text-align:left;">p{n} </td>
+<td style="text-align:left;"> 匹配p出现n次</td>
+</tr>
+<tr>
+<td style="text-align:left;">p{n,} </td>
+<td style="text-align:left;"> 匹配p至少出现n次</td>
+</tr>
+<tr>
+<td style="text-align:left;">p{n,m} </td>
+<td style="text-align:left;"> 匹配所有p出现的次数大于n小于m的情况</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>ERE修改的语法符号</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">符号 </th>
+<th style="text-align:center;"> 状态 </th>
+<th style="text-align:left;"> 模式含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">? </td>
+<td style="text-align:center;"> 新增 </td>
+<td style="text-align:left;"> 多次匹配(包括0次)</td>
+</tr>
+<tr>
+<td style="text-align:left;">+ </td>
+<td style="text-align:center;"> 新增 </td>
+<td style="text-align:left;"> 至少一次匹配</td>
+</tr>
+<tr>
+<td style="text-align:left;"></td>
+<td style="text-align:center;"> </td>
+<td style="text-align:left;"> 新增 | 或运算, 匹配两个子表达式的合集</td>
+</tr>
+<tr>
+<td style="text-align:left;">() /{m,n} </td>
+<td style="text-align:center;"> 修改 </td>
+<td style="text-align:left;"> <strong>注释:</strong> 不需要转义 (, ), {, } 这些符号</td>
+</tr>
+<tr>
+<td style="text-align:left;">\n </td>
+<td style="text-align:center;"> 取消 </td>
+<td style="text-align:left;"> &hellip;&hellip;</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>BRE 和 ERE 共享, 额外的一些定义:</p>
+
+<p>特殊符号:</p>
+
+<p>表一:</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">POSIX类 </th>
+<th style="text-align:center;"> perl类 </th>
+<th style="text-align:left;"> 描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">[:alnum:] </td>
+<td style="text-align:center;">    </td>
+<td style="text-align:left;"> 数字集+字母集</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:alpha:] </td>
+<td style="text-align:center;"> \a </td>
+<td style="text-align:left;"> 字母集</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:lower:] </td>
+<td style="text-align:center;"> \l </td>
+<td style="text-align:left;"> 小写字母集</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:upper:] </td>
+<td style="text-align:center;"> \u </td>
+<td style="text-align:left;"> 大写字母集</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:blank:] </td>
+<td style="text-align:center;">    </td>
+<td style="text-align:left;"> 空白字符集(空格+制表符)</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:space:] </td>
+<td style="text-align:center;"> \s </td>
+<td style="text-align:left;"> 所有空白字符(包括[:blank:])</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:cntrl:] </td>
+<td style="text-align:center;">    </td>
+<td style="text-align:left;"> 不可打印的控制字符集(退格, 删除&hellip;.)</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:digit:] </td>
+<td style="text-align:center;"> \d </td>
+<td style="text-align:left;"> 十进制数字</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:xdigit:] </td>
+<td style="text-align:center;"> \x </td>
+<td style="text-align:left;"> 十六进制数字</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:graph:] </td>
+<td style="text-align:center;">    </td>
+<td style="text-align:left;"> 可打印的非空白字符</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:print:] </td>
+<td style="text-align:center;"> \p </td>
+<td style="text-align:left;"> 可打印的字符</td>
+</tr>
+<tr>
+<td style="text-align:left;">[:pumct:] </td>
+<td style="text-align:center;">    </td>
+<td style="text-align:left;"> 标点符号</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>表二:</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">perl类 </th>
+<th style="text-align:left;"> 等效POSIX </th>
+<th style="text-align:left;"> 描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">\o </td>
+<td style="text-align:left;"> [0-7] </td>
+<td style="text-align:left;"> 八进制数字</td>
+</tr>
+<tr>
+<td style="text-align:center;">\O </td>
+<td style="text-align:left;"> [^0-7] </td>
+<td style="text-align:left;"> 非八进制</td>
+</tr>
+<tr>
+<td style="text-align:center;">\w </td>
+<td style="text-align:left;"> [[:alnum:]] </td>
+<td style="text-align:left;"> 单词</td>
+</tr>
+<tr>
+<td style="text-align:center;">\W </td>
+<td style="text-align:left;"> [^[:alnum:]] </td>
+<td style="text-align:left;"> 非单词</td>
+</tr>
+<tr>
+<td style="text-align:center;">\A </td>
+<td style="text-align:left;"> [^[:alphha:]] </td>
+<td style="text-align:left;"> 非字母</td>
+</tr>
+<tr>
+<td style="text-align:center;">\L </td>
+<td style="text-align:left;"> [^[:lower:]] </td>
+<td style="text-align:left;"> 非小写字母</td>
+</tr>
+<tr>
+<td style="text-align:center;">\U </td>
+<td style="text-align:left;"> [^[:upper:]] </td>
+<td style="text-align:left;"> 非大写字母</td>
+</tr>
+<tr>
+<td style="text-align:center;">\S </td>
+<td style="text-align:left;"> [^[:space:]] </td>
+<td style="text-align:left;"> 非空白字符</td>
+</tr>
+<tr>
+<td style="text-align:center;">\D </td>
+<td style="text-align:left;"> [^[:digit:]] </td>
+<td style="text-align:left;"> 非十进制数字</td>
+</tr>
+<tr>
+<td style="text-align:center;">\X </td>
+<td style="text-align:left;"> [^[:xdigit:]] </td>
+<td style="text-align:left;"> 非十六进制数字</td>
+</tr>
+<tr>
+<td style="text-align:center;">\P </td>
+<td style="text-align:left;"> [^[:print:]] </td>
+<td style="text-align:left;"> 非可打印字符</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>一些特殊定义:</p>
+
+<p>转义定义: <code>\r</code> (回车), <code>\n</code> (换行), <code>\b</code> (退格), <code>\t</code> (制表符), <code>\v</code> (垂直制表符), <code>\"</code> 和 <code>\'</code></p>
+
+<h1>Regular Express 使用例子</h1>
+
+<p>1) 匹配任何单一字符(ASCII) <code>.</code></p>
+
+<p>2) 匹配行首 <code>^</code>, 例子如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; ls -l <span class="p">|</span> grep <span class="s1">&#39;^d&#39;</span>
+</span><span class='line'>drwxr-xr-x <span class="m">6</span> xmq users   <span class="m">4096</span> 10月 <span class="m">12</span> 15:53 Code/
+</span><span class='line'>drwxr-xr-x <span class="m">2</span> xmq users   <span class="m">4096</span> 9月  <span class="m">30</span> 02:41 pic/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3) 匹配行尾 <code>$</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>^<span class="nv">$ </span>  ---  匹配空行
+</span><span class='line'>^.%  ---  匹配单字符行
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>4) 匹配重复字符 <code>*</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ro*t  &lt;- 其中 rot, root, rooot 都符合其匹配结果
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>5) 特殊字符, 需要转义 <code>\</code></p>
+
+<p>6) 匹配一个范围 <code>[]</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>0-9<span class="o">]</span> or <span class="o">[</span>0123456789<span class="o">]</span>       &lt;- 匹配数字
+</span><span class='line'><span class="o">[</span>a-zA-Z<span class="o">]</span>                    &lt;- 匹配所有大小写字母
+</span><span class='line'><span class="o">[</span>a-zA-Z0-9<span class="o">]</span>                 &lt;- 匹配字母和数字
+</span><span class='line'><span class="o">[</span>a-zA-Z<span class="o">]</span>*                   &lt;- 匹配所有单词
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意: 在 <code>[]</code> 中, <code>^</code> 表示否定的意思</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>^A-Za-z<span class="o">]</span>                   &lt;- 匹配非字母
+</span><span class='line'><span class="o">[</span>^0-9<span class="o">]</span>                      &lt;- 匹配非数字
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>7) 匹配重复出现多次 <code>\{\}</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>A<span class="se">\{</span>2<span class="se">\}</span>B                     &lt;- 匹配 AAB
+</span><span class='line'>A<span class="se">\{</span>2,<span class="se">\}</span>B                    &lt;- 匹配 AAB AAAB AAAAB ...
+</span><span class='line'>A<span class="se">\{</span>2,3<span class="se">\}</span>B                   &lt;- 匹配 AAB AAAB
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考文档</h1>
+
+<p>1) <a href="http://blog.csdn.net/wklken/article/details/6429526">http://blog.csdn.net/wklken/article/details/6429526</a></p>
+
+<p>2) <a href="http://blog.chinaunix.net/uid-23045379-id-2562051.html">http://blog.chinaunix.net/uid-23045379-id-2562051.html</a></p>
+
+<p>3) <a href="http://blog.csdn.net/a627088424/article/details/15435873">http://blog.csdn.net/a627088424/article/details/15435873</a></p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>Portable Operating System Interface, 即可移植操作系统接口, 定义了操作系统应该为应用程序提供的接口标准, 是IEEE为要在各种UNIX操作系统上运行的软件而定义的一系列API标准的总称, 其正式称呼为IEEE 1003, 而国际标准名称为ISO/IEC 9945, 信息来自<a href="http://baike.baidu.com/view/209573.htm?fr=aladdin">百度百科</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ArchLinux上搭建LAMP环境]]></title>
