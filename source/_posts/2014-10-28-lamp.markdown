@@ -103,6 +103,65 @@ extension=mysqli.so
 
 目前的配置到此结束。
 
+# 关于Discuz的配置
+
+=====增加于 2014/11/4=======
+
+首先把Discuz的文件放置到站点文档目录下, 初步配置一下权限
+
+```bash
+>> sudo chmod -R 744 upload/    ; 把所有文件文件夹的权限调低
+>> sudo chmod -R -x upload
+>> sudo chmod -R +x upload      ; 这两个命令完成 取消文件的执行权限
+>> sudo mv upload/* /sur/http/
+```
+
+> 出现三个问题:
+
+> (1) GD库没安装
+
+> (2) 文件权限需要重启配置
+
+> (3) PHP不能正确连接mysql
+
+解决方案
+
+(1) 安装GD库
+
+```bash
+>> sudo pacman -S php-gd
+```
+
+配置php, 打开 `sudo vim /etc/php/php.ini`, 取消 `extension=gd.so`
+
+重启apache服务, `sudo systemctl retstart httpd`
+
+(2) 配置文件权限
+
+```bash
+>> sudo chown -R http:http config
+>> sudo chown -R http:http data
+>> sudo chown -R http:http uc_client/data/cache
+>> sudo chown -R http:http uc_server/data
+```
+
+(3) 检查mysql与php的情况
+
+编辑php.ini, `sudo vim /etc/php/php.ini`, 确保一下三条处于打开的状态
+
+```bash
+extension=mysql.so
+extension=mysqli.so
+extension=pdo_mysql.so
+```
+
+此外还要解决数据库初始化的问题
+
+```bash
+>> sudo mysql_secure_installation
+>> sudo systemctl restart mysqld
+```
+
 # 参考文献
 
 https://wiki.archlinux.org/index.php/Apache
