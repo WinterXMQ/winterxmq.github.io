@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: cmd | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/cmd/atom.xml" rel="self"/>
+  <link href="http://WinterXMQ.github.io/"/>
+  <updated>2014-11-04T12:26:16+00:00</updated>
+  <id>http://WinterXMQ.github.io/</id>
+  <author>
+    <name><![CDATA[WinterXMQ]]></name>
+    <email><![CDATA[WinterXMQ@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Windows下的硬链接、软连接和快捷方式]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/04/windows-mklink/"/>
+    <updated>2014-11-04T11:21:09+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/04/windows-mklink</id>
+    <content type="html"><![CDATA[<p>很久以前记得Windows下是没有硬链接、软连接这个功能的, 前段时间, 在关注Windows的WinSxS的时候, 有篇文章提到硬链接时才去查阅后才发现Windows支持这个特性了</p>
+
+<p>在一些相关的资料中表明, Windows的这项特性其实很早就存在了, 只是不为别人所知, 在Win7的WinSxS中应用了这个技术, 使得我们以为这个是个新技术, 其实在XP中以及支持这一特性了</p>
+
+<blockquote><p><strong>注意点:</strong></p>
+
+<p>  (1) Windows的链接技术只支持NTFS文件系统</p>
+
+<p>  (2) 硬链接不能跨卷, 简单的说不能把C盘的文件链接到D盘</p>
+
+<p>  (3) 软链接和符号链接不能跨磁盘</p></blockquote>
+
+<h1>三种文件夹的异同</h1>
+
+<p>主要关注 <code>硬链接</code> 和 <code>软连接</code></p>
+
+<p>1) Symbolic Link(符号链接)</p>
+
+<ul>
+<li>图标与快捷方式很像</li>
+<li>在系统中不占用空间</li>
+<li>在文件系统中不是独立文件</li>
+<li>在操作系统层解析</li>
+<li>源文件丢失, 链接失效</li>
+<li>两者互不影响</li>
+</ul>
+
+
+<p>2) Hard Link(硬链接)</p>
+
+<ul>
+<li>占用同一个空间, 引用同一个对象(不是拷贝)</li>
+<li>在操作系统层解析</li>
+<li>移除硬链接, 源文件不受影响</li>
+<li>源文件移除, 硬链接不受影响</li>
+<li>两者修改的是同一份文件</li>
+</ul>
+
+
+<p>3) Shortcut(快捷方式)</p>
+
+<h1>Windows XP 下的实现</h1>
+
+<p>文件硬链接的实现</p>
+
+<pre><code class="bash">&gt;&gt; fsutil hardlink create newFileName fileName
+</code></pre>
+
+<p>文件夹的硬链接实现, 通过 <code>junction.exe</code> 来实现, 具体程序网上下载</p>
+
+<pre><code class="bash">&gt;&gt; junction.exe Link Target     // 创建硬链接
+&gt;&gt; junction.exe target /d       // 删除文件夹
+</code></pre>
+
+<p><strong>注意:</strong></p>
+
+<p> 1) 创建文件夹硬连接, 这个可以跨分区</p>
+
+<p> 2) 删除硬链接必须使用 <code>junction 文件夹连接名 /d</code>, 否则会删掉源文件</p>
+
+<h1>Vista, Windows 7及以上版本下的实现</h1>
+
+<p>使用 <code>mklink</code> 来实现, 功能比 <code>fsutil</code> 强多了</p>
+
+<pre><code class="bash">&gt;&gt; mklink
+MKLINK [[/D] | [/H] | [/J]] Link Target
+
+        /D      Creates a directory symbolic link.  Default is a file
+                symbolic link.
+        /H      Creates a hard link instead of a symbolic link.
+        /J      Creates a Directory Junction.
+        Link    specifies the new symbolic link name.
+        Target  specifies the path (relative or absolute) that the new link
+                refers to.
+</code></pre>
+
+<p>简单的说:</p>
+
+<ul>
+<li>/D 创建目录符号链接, 默认为文件符号链接</li>
+<li>/H 创建硬链接</li>
+<li>/J 创建目录联接</li>
+</ul>
+
+
+<h1>第三方工具 Link Shell Extension</h1>
+
+<p>在Windows下点击操作完成文件夹链接的工具<a href="%22http://www.schina.priv.at/nt/hardlinkshellext/hardlinkshellext.html%22" title="Link Shell Extension 官网">Link Shell Extension</a></p>
+
+<p>这个工具对文件夹可以完成以下7个功能: 1) Symbolic Link 2) Junction 3) Smart Copy 4) Smart Mirror 5) DeLorean Copy 6) Hardlink Clone 7) Symbolic Link Clone</p>
+
+<p>每个功能的具体看这个工具的官网说明</p>
+
+<h1>参考</h1>
+
+<p>1) <a href="http://www.cnblogs.com/heqichang/archive/2012/04/26/241774.html">http://www.cnblogs.com/heqichang/archive/2012/04/26/241774.html</a></p>
+
+<p>2) <a href="http://chenkegarfield.blog.163.com/blog/static/62330008201231153049164/">http://chenkegarfield.blog.163.com/blog/static/62330008201231153049164/</a></p>
+
+<p>3) <a href="http://blog.csdn.net/wzy0623/article/details/3596572">http://blog.csdn.net/wzy0623/article/details/3596572</a></p>
+
+<p>4) <a href="http://www.cnblogs.com/plusium/archive/2010/03/17/1688511.html">http://www.cnblogs.com/plusium/archive/2010/03/17/1688511.html</a></p>
+]]></content>
+  </entry>
+  
+</feed>

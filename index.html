@@ -9,7 +9,7 @@
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="linux, regular-expression, shell Comments Linux中的正则表达式 POSIX1 定义了两种正则表达式语法: 1) BRE 基本正则表达式(Basic Regular Expression); 2) ERE 扩展的正则表达式(Extended &hellip;">
+	<meta name="description" content="cmd, system, windows Comments Windows下的硬链接、软连接和快捷方式 很久以前记得Windows下是没有硬链接、软连接这个功能的, 前段时间, 在关注Windows的WinSxS的时候, 有篇文章提到硬链接时才去查阅后才发现Windows支持这个特性了 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,6 +101,160 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-04T11:21:09+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cmd/'>cmd</a>, <a class='category' href='/blog/categories/system/'>system</a>, <a class='category' href='/blog/categories/windows/'>windows</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/11/04/windows-mklink/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/11/04/windows-mklink/" itemprop="url">Windows下的硬链接、软连接和快捷方式</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>很久以前记得Windows下是没有硬链接、软连接这个功能的, 前段时间, 在关注Windows的WinSxS的时候, 有篇文章提到硬链接时才去查阅后才发现Windows支持这个特性了</p>
+
+<p>在一些相关的资料中表明, Windows的这项特性其实很早就存在了, 只是不为别人所知, 在Win7的WinSxS中应用了这个技术, 使得我们以为这个是个新技术, 其实在XP中以及支持这一特性了</p>
+
+<blockquote><p><strong>注意点:</strong></p>
+
+<p>  (1) Windows的链接技术只支持NTFS文件系统</p>
+
+<p>  (2) 硬链接不能跨卷, 简单的说不能把C盘的文件链接到D盘</p>
+
+<p>  (3) 软链接和符号链接不能跨磁盘</p></blockquote>
+
+<h1>三种文件夹的异同</h1>
+
+<p>主要关注 <code>硬链接</code> 和 <code>软连接</code></p>
+
+<p>1) Symbolic Link(符号链接)</p>
+
+<ul>
+<li>图标与快捷方式很像</li>
+<li>在系统中不占用空间</li>
+<li>在文件系统中不是独立文件</li>
+<li>在操作系统层解析</li>
+<li>源文件丢失, 链接失效</li>
+<li>两者互不影响</li>
+</ul>
+
+
+<p>2) Hard Link(硬链接)</p>
+
+<ul>
+<li>占用同一个空间, 引用同一个对象(不是拷贝)</li>
+<li>在操作系统层解析</li>
+<li>移除硬链接, 源文件不受影响</li>
+<li>源文件移除, 硬链接不受影响</li>
+<li>两者修改的是同一份文件</li>
+</ul>
+
+
+<p>3) Shortcut(快捷方式)</p>
+
+<h1>Windows XP 下的实现</h1>
+
+<p>文件硬链接的实现</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; fsutil hardlink create newFileName fileName
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>文件夹的硬链接实现, 通过 <code>junction.exe</code> 来实现, 具体程序网上下载</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; junction.exe Link Target     // 创建硬链接
+</span><span class='line'>&gt;&gt; junction.exe target /d       // 删除文件夹
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>注意:</strong></p>
+
+<p> 1) 创建文件夹硬连接, 这个可以跨分区</p>
+
+<p> 2) 删除硬链接必须使用 <code>junction 文件夹连接名 /d</code>, 否则会删掉源文件</p>
+
+<h1>Vista, Windows 7及以上版本下的实现</h1>
+
+<p>使用 <code>mklink</code> 来实现, 功能比 <code>fsutil</code> 强多了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mklink
+</span><span class='line'>MKLINK <span class="o">[[</span>/D<span class="o">]</span> <span class="p">|</span> <span class="o">[</span>/H<span class="o">]</span> <span class="p">|</span> <span class="o">[</span>/J<span class="o">]]</span> Link Target
+</span><span class='line'>
+</span><span class='line'>        /D      Creates a directory symbolic link.  Default is a file
+</span><span class='line'>                symbolic link.
+</span><span class='line'>        /H      Creates a hard link instead of a symbolic link.
+</span><span class='line'>        /J      Creates a Directory Junction.
+</span><span class='line'>        Link    specifies the new symbolic link name.
+</span><span class='line'>        Target  specifies the path <span class="o">(</span>relative or absolute<span class="o">)</span> that the new link
+</span><span class='line'>                refers to.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>简单的说:</p>
+
+<ul>
+<li>/D 创建目录符号链接, 默认为文件符号链接</li>
+<li>/H 创建硬链接</li>
+<li>/J 创建目录联接</li>
+</ul>
+
+
+<h1>第三方工具 Link Shell Extension</h1>
+
+<p>在Windows下点击操作完成文件夹链接的工具<a href="%22http://www.schina.priv.at/nt/hardlinkshellext/hardlinkshellext.html%22" title="Link Shell Extension 官网">Link Shell Extension</a></p>
+
+<p>这个工具对文件夹可以完成以下7个功能: 1) Symbolic Link 2) Junction 3) Smart Copy 4) Smart Mirror 5) DeLorean Copy 6) Hardlink Clone 7) Symbolic Link Clone</p>
+
+<p>每个功能的具体看这个工具的官网说明</p>
+
+<h1>参考</h1>
+
+<p>1) <a href="http://www.cnblogs.com/heqichang/archive/2012/04/26/241774.html">http://www.cnblogs.com/heqichang/archive/2012/04/26/241774.html</a></p>
+
+<p>2) <a href="http://chenkegarfield.blog.163.com/blog/static/62330008201231153049164/">http://chenkegarfield.blog.163.com/blog/static/62330008201231153049164/</a></p>
+
+<p>3) <a href="http://blog.csdn.net/wzy0623/article/details/3596572">http://blog.csdn.net/wzy0623/article/details/3596572</a></p>
+
+<p>4) <a href="http://www.cnblogs.com/plusium/archive/2010/03/17/1688511.html">http://www.cnblogs.com/plusium/archive/2010/03/17/1688511.html</a></p>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -2074,251 +2228,11 @@
 
 </article>
 
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-21T13:44:02+00:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/coding/'>coding</a>
-
-
-</div>
-		
-			<span class="comments"><a href="/blog/2014/09/21/github-pages/#disqus_thread">Comments</a></span>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/09/21/github-pages/" itemprop="url">GitHub Pages搭建基于Octopress的Blog</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>把Blog的源码托管在Github上，采用Github的Pages功能来呈现</p>
-
-<p>[TOC]</p>
-
-<h1>配置git的ssh key</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; ssh-keygen -t rsa -C <span class="s2">&quot;WinterXMQ@google.com&quot;</span>
-</span><span class='line'>  &gt;&gt; clip &lt; ~/.ssh/id_rsa.pub
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在执行 <code>ssh-keygen</code> 后需要输入 <code>passphrase</code>
-执行完两个命令后ssh的公钥就已经在系统的粘贴板上了，然后登陆Github的设置->添加ssh公钥上完成相关的添加
-接着按照下面的指令完成相关的测试</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; ssh -T git@github.com
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当出现如下的提示，则说明配置成功</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Enter passphrase <span class="k">for</span> key <span class="s1">&#39;/home/xmq/.ssh/id_rsa&#39;</span>:
-</span><span class='line'>Hi WinterXMQ! You<span class="err">&#39;</span>ve successfully authenticated, but GitHub does not provide shell access.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>配置本地的ruby和Jekyll、Octopress环境</h1>
-
-<p>Octopress是基于Jekyll的，而Jekyll则是编写而成的，因此我们需要分别搭建这三个环境</p>
-
-<h2>关于Ruby的安装配置</h2>
-
-<p>网上有说需要保持ruby在某个版本上，根据我的测试，采用最新版本的ruby也同样没有问题，估计是早期的Jekyll对高版本的Ruby支持不好
-在Arch Linux下采用 <code>pacman -S ruby</code> 完成Ruby的安装(默认Ruby已经安装)</p>
-
-<p>Ruby 的官方源在国内的速度不佳，更换成淘宝的Ruby源</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; gem sources -a https://ruby.taobao.org/
-</span><span class='line'>  &gt;&gt; gem sources --remove https://rubygems.org/
-</span><span class='line'>  &gt;&gt; gem sources -l
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注: 确保只有一条地址</p>
-
-<p>采用 <code>sudo gem update --system</code> 更新gem脚本</p>
-
-<h2>关于Jekyll和Octopress的安装</h2>
-
-<p>Jekyll是Octopress的一个依赖，因此不用特意安装Jekyll
-确保系统安装有 <code>Git</code>, 从Github上获取Octopress官方源码</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; <span class="nb">cd </span>Code
-</span><span class='line'>  &gt;&gt; git clone <span class="s2">&quot;git://github.com/imathis/octopress.git&quot;</span> blog
-</span><span class='line'>  &gt;&gt; <span class="nb">cd </span>blog
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个目录就是以后写Blog和发布Blog的工作目录</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'> + _deploy       &lt;- 发布在Github上用于站点显示的master<span class="o">(</span>gh-pages<span class="o">)</span>分支
-</span><span class='line'> + public
-</span><span class='line'> + plugins        &lt;- 用于放置Octopress的插件
-</span><span class='line'> + sass           &lt;- 似乎和模板的关系比较密切, 作用未知
-</span><span class='line'> - <span class="nb">source</span>     &lt;- 放置站点源码, 包括Blog的Makedown文件
-</span><span class='line'>   ...
-</span><span class='line'>   + _posts       &lt;- 放置Blog的Makedown文件
-</span><span class='line'> + .themes        &lt;- 放置主题的
-</span><span class='line'> . _config.yml    &lt;- 站点总配置文件
-</span><span class='line'> . Gemfile        &lt;- Octopress安装脚本配置
-</span><span class='line'> . Rakefile       &lt;- Octopress控制脚本
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Octopress是采用 <code>bundle</code> 来完成安装的, <code>bundle</code> 会读取当前目录下的 <code>Gemfile</code> 来获取本次安装的软件源、以及所需要安装的软件包, <code>bundle</code> 会给出一些软件的依赖关系, 并自动安装所依赖的软件
-同时 <code>bundle</code> 也是Ruby的软件需要通过 <code>gem install bundler</code> 来完成安装
-然而通过 <code>gem</code> 安装的软件会被安装在 <code>~/.gem/ruby/VERSION_RUBY/</code>, 需要添加环境变量</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; sudo vim /etc/profile
-</span><span class='line'>  add follow to the end of the file
-</span><span class='line'>  <span class="nv">RUBY_HOME</span><span class="o">=</span>~/.gem/ruby/2.1.0
-</span><span class='line'>  <span class="nv">PATH</span><span class="o">=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span>:<span class="k">${</span><span class="nv">RUBY_HOME</span><span class="k">}</span>/bin
-</span><span class='line'>  <span class="nb">export </span>RUBY_HOME PATH
-</span><span class='line'>  &gt;&gt; <span class="nb">source</span> /etc/profile
-</span><span class='line'>  &gt;&gt; bundle --version
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此外我们需要把 <code>Gemfile</code> 第一行的软件源换成<a href="https://ruby.taobao.org/">淘宝Ruby源</a> <code>source 'https://ruby.taobao.org/'</code>
-然后执行 <code>bundle install</code>, 并耐性等待(当然采用国内的Ruby源, 安装时间不会太长)</p>
-
-<h1>Blog工作目录与Github的设置</h1>
-
-<p>无论是站点源码还是Blog都是采用git来管理, 需要把本地目录和Github做对接, 同时对站点进行最初步的设置</p>
-
-<h2>与Github对接</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; git remote rm origin          <span class="c"># 删除Octopress的远程分支</span>
-</span><span class='line'>  &gt;&gt; rake setup_github_pages
-</span><span class='line'>    git@github.com:WinterXMQ/winterxmq.github.io.git
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>站点初始化设置</h2>
-
-<p>安装主题</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; git clone git@github.com:shashankmehta/greyshade.git .themes/greyshade
-</span><span class='line'>  &gt;&gt; <span class="nb">echo</span> <span class="s2">&quot;\$greyshade: color;&quot;</span> &gt;&gt; sass/custom/_colors.scss
-</span><span class='line'>  &gt;&gt; rake <span class="s2">&quot;install[greyshade]&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>生成站点数据</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; rake generate
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注: 在Jekyll编译的时候会出现错误, 提示没有Javascript的解释器, 这里有两三个解决方案, 我采用的是安装nodejs, 采用 <code>sudo pacman -S nodejs</code> 完成安装</p>
-
-<p>通过 4000 端口在本地预览Blog站点, <a href="http://127.0.0.1:400">http://127.0.0.1:400</a></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; rake preview
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>上传源码</h2>
-
-<p>把源码上传到Github的同个工程的source分支下</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; git add .
-</span><span class='line'>  &gt;&gt; git commit -m <span class="s2">&quot;Init Octopress&quot;</span>
-</span><span class='line'>  &gt;&gt; git push origin <span class="nb">source</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>注意点</h1>
-
-<h2>zsh引起无法新建Blog的问题</h2>
-
-<p>解决在zsh下无法新建Blog的问题, 具体见参考文档5</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &gt;&gt; rake new_post<span class="o">[</span><span class="s2">&quot;arch-linux-reinstall-glibc.markdown&quot;</span><span class="o">]</span>
-</span><span class='line'>  zsh: no matches found: new_post<span class="o">[</span>arch-linux-reinstall-glibc<span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>原因: zsh中若出现 &lsquo;*&rsquo;, &lsquo;(&rsquo;, &lsquo;|&rsquo;, &lsquo;&lt;&rsquo;, &lsquo;[&rsquo;, or &lsquo;?&rsquo; 符号, 则将其识别为查找文件名的通配符
-解决办法:
-+ rake &ldquo;new_post[arch-linux-reinstall-glibc.markdown]&rdquo;
-+ rake new_post
-+ vim .zshrc  添加 alias rake=&ldquo;noglob rake&rdquo;</p>
-
-<h1>参考文档</h1>
-
-<blockquote><ol>
-<li><a href="http://blog.csdn.net/binyao02123202/article/details/20130891">http://blog.csdn.net/binyao02123202/article/details/20130891</a></li>
-<li><a href="http://blog.cnyingchao.com/website/disqus-simplified-chinese.html">http://blog.cnyingchao.com/website/disqus-simplified-chinese.html</a></li>
-<li><a href="http://xuhehuan.com/783.html">http://xuhehuan.com/783.html</a></li>
-<li><a href="http://minejo.github.io/blog/2013/08/09/shi-yong-github-plus-octopresszuo-blog/">http://minejo.github.io/blog/2013/08/09/shi-yong-github-plus-octopresszuo-blog/</a></li>
-<li><a href="http://fancyoung.com/blog/use-octopress-new-post-function-with-zsh/">http://fancyoung.com/blog/use-octopress-new-post-function-with-zsh/</a></li>
-</ol>
-</blockquote>
-
-		
-		
-	</div>
-
-</article>
-
 </div>
 <nav id="pagenavi">
     
+    
+        <a href="2" class="next">Next</a>
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
