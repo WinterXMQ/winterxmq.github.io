@@ -4,7 +4,7 @@
   <title><![CDATA[Category: linux | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-04T12:26:16+00:00</updated>
+  <updated>2014-11-04T14:23:28+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -437,6 +437,60 @@ extension=mysqli.so
 </code></pre>
 
 <p>目前的配置到此结束。</p>
+
+<h1>关于Discuz的配置</h1>
+
+<p>=====增加于 2014/11/4=======</p>
+
+<p>首先把Discuz的文件放置到站点文档目录下, 初步配置一下权限</p>
+
+<pre><code class="bash">&gt;&gt; sudo chmod -R 744 upload/    ; 把所有文件文件夹的权限调低
+&gt;&gt; sudo chmod -R -x upload
+&gt;&gt; sudo chmod -R +x upload      ; 这两个命令完成 取消文件的执行权限
+&gt;&gt; sudo mv upload/* /sur/http/
+</code></pre>
+
+<blockquote><p>出现三个问题:</p>
+
+<p>(1) GD库没安装</p>
+
+<p>(2) 文件权限需要重启配置</p>
+
+<p>(3) PHP不能正确连接mysql</p></blockquote>
+
+<p>解决方案</p>
+
+<p>(1) 安装GD库</p>
+
+<pre><code class="bash">&gt;&gt; sudo pacman -S php-gd
+</code></pre>
+
+<p>配置php, 打开 <code>sudo vim /etc/php/php.ini</code>, 取消 <code>extension=gd.so</code></p>
+
+<p>重启apache服务, <code>sudo systemctl retstart httpd</code></p>
+
+<p>(2) 配置文件权限</p>
+
+<pre><code class="bash">&gt;&gt; sudo chown -R http:http config
+&gt;&gt; sudo chown -R http:http data
+&gt;&gt; sudo chown -R http:http uc_client/data/cache
+&gt;&gt; sudo chown -R http:http uc_server/data
+</code></pre>
+
+<p>(3) 检查mysql与php的情况</p>
+
+<p>编辑php.ini, <code>sudo vim /etc/php/php.ini</code>, 确保一下三条处于打开的状态</p>
+
+<pre><code class="bash">extension=mysql.so
+extension=mysqli.so
+extension=pdo_mysql.so
+</code></pre>
+
+<p>此外还要解决数据库初始化的问题</p>
+
+<pre><code class="bash">&gt;&gt; sudo mysql_secure_installation
+&gt;&gt; sudo systemctl restart mysqld
+</code></pre>
 
 <h1>参考文献</h1>
 
