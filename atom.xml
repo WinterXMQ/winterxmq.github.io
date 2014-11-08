@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-04T14:23:28+00:00</updated>
+  <updated>2014-11-08T15:03:39+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,118 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[BBS的本地测试环境的搭建]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/04/test-for-bbs/"/>
+    <updated>2014-11-04T14:29:56+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/04/test-for-bbs</id>
+    <content type="html"><![CDATA[<p>本地环境的LAMP环境安装见<a href="http://WinterXMQ.github.io/blog/2014/10/28/lamp/">ArchLinux上搭建LAMP环境</a></p>
+
+<p>这个地方主要讲bbs的备份和本地还原</p>
+
+<h1>服务器备份</h1>
+
+<p>文档数据的备份</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; <span class="nb">cd</span> /var/www
+</span><span class='line'>&gt;&gt; tar czvf sns-data.tar.gz sns/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>数据库的备份</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mysqldump -hHOSTNAME -uUSER -pPASSWORD DATABASENAME &gt; sns-date.sql
+</span><span class='line'>&gt;&gt; du -h sns-date.sql       <span class="p">;</span> 查看文件大小
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>本地还原</h1>
+
+<p>文档数据还原</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; rm -rf /srv/http/*
+</span><span class='line'>&gt;&gt; tar zxvf sns-date.tar.gz -C /srv/http/sns
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>数据库还原</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mysql -uUSER -p
+</span><span class='line'>mysql&gt; create database <span class="sb">`</span>sns<span class="sb">`</span><span class="p">;</span>
+</span><span class='line'>mysql&gt; <span class="nb">exit</span>
+</span><span class='line'>Bye
+</span><span class='line'>&gt;&gt; mysql -uUSER -p sns &lt; sns-date.sql
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>本地配置</h1>
+
+<p>(1) 虚拟主机配置</p>
+
+<p>以ArchLinux为例, apache是ArchLinux的默认安装</p>
+
+<p>打开配置文件, <code>sudo vim /etc/httpd/conf/extra/httpd-vhosts.conf</code>, 做如下修改</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>    DocumentRoot <span class="s2">&quot;/srv/http/sns&quot;</span>
+</span><span class='line'>    ServerName <span class="s2">&quot;bbs.winterxq.me&quot;</span>
+</span><span class='line'>    &lt;Directory <span class="s2">&quot;/srv/http/sns&quot;</span>&gt;
+</span><span class='line'>        Options Indexes FollowSymLinks
+</span><span class='line'>        AllowOverride None
+</span><span class='line'>        Order allow,deny
+</span><span class='line'>        Allow from all
+</span><span class='line'>    &lt;/Directory&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重启服务, <code>sudo systemctl restart httpd</code></p>
+
+<p>(2) 设置apache和mysql的开机自启</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo systemctl <span class="nb">enable </span>httpd
+</span><span class='line'>&gt;&gt; sudo systemctl <span class="nb">enable </span>mysqld
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(3) 设置文件夹所有权</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo chown -R http:http data/
+</span><span class='line'>&gt;&gt; sudo chown -R http:http config/
+</span><span class='line'>&gt;&gt; sudo chown -R http:http uc_server/data/
+</span><span class='line'>&gt;&gt; sudo chown -R http:http uc_client/data/cache/
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Windows下的硬链接、软连接和快捷方式]]></title>

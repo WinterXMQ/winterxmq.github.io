@@ -4,7 +4,7 @@
   <title><![CDATA[Category: apache | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/apache/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-04T14:23:28+00:00</updated>
+  <updated>2014-11-08T15:03:39+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,84 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[BBS的本地测试环境的搭建]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/04/test-for-bbs/"/>
+    <updated>2014-11-04T14:29:56+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/04/test-for-bbs</id>
+    <content type="html"><![CDATA[<p>本地环境的LAMP环境安装见<a href="/blog/2014/10/28/lamp/">ArchLinux上搭建LAMP环境</a></p>
+
+<p>这个地方主要讲bbs的备份和本地还原</p>
+
+<h1>服务器备份</h1>
+
+<p>文档数据的备份</p>
+
+<pre><code class="bash">&gt;&gt; cd /var/www
+&gt;&gt; tar czvf sns-data.tar.gz sns/
+</code></pre>
+
+<p>数据库的备份</p>
+
+<pre><code class="bash">&gt;&gt; mysqldump -hHOSTNAME -uUSER -pPASSWORD DATABASENAME &gt; sns-date.sql
+&gt;&gt; du -h sns-date.sql       ; 查看文件大小
+</code></pre>
+
+<h1>本地还原</h1>
+
+<p>文档数据还原</p>
+
+<pre><code class="bash">&gt;&gt; rm -rf /srv/http/*
+&gt;&gt; tar zxvf sns-date.tar.gz -C /srv/http/sns
+</code></pre>
+
+<p>数据库还原</p>
+
+<pre><code class="bash">&gt;&gt; mysql -uUSER -p
+mysql&gt; create database `sns`;
+mysql&gt; exit
+Bye
+&gt;&gt; mysql -uUSER -p sns &lt; sns-date.sql
+</code></pre>
+
+<h1>本地配置</h1>
+
+<p>(1) 虚拟主机配置</p>
+
+<p>以ArchLinux为例, apache是ArchLinux的默认安装</p>
+
+<p>打开配置文件, <code>sudo vim /etc/httpd/conf/extra/httpd-vhosts.conf</code>, 做如下修改</p>
+
+<pre><code class="bash">&lt;VirtualHost *:80&gt;
+    DocumentRoot "/srv/http/sns"
+    ServerName "bbs.winterxq.me"
+    &lt;Directory "/srv/http/sns"&gt;
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;
+</code></pre>
+
+<p>重启服务, <code>sudo systemctl restart httpd</code></p>
+
+<p>(2) 设置apache和mysql的开机自启</p>
+
+<pre><code class="bash">&gt;&gt; sudo systemctl enable httpd
+&gt;&gt; sudo systemctl enable mysqld
+</code></pre>
+
+<p>(3) 设置文件夹所有权</p>
+
+<pre><code class="bash">&gt;&gt; sudo chown -R http:http data/
+&gt;&gt; sudo chown -R http:http config/
+&gt;&gt; sudo chown -R http:http uc_server/data/
+&gt;&gt; sudo chown -R http:http uc_client/data/cache/
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ArchLinux上搭建LAMP环境]]></title>
