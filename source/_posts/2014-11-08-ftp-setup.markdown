@@ -100,8 +100,18 @@ guest_username=virtual
 virtual_use_local_privs=YES
 ```
 
-# 参考
+在用的过程中发现 FTP 不支持软链接的方式, 因此换成mount的方式来实现
 
+```bash
+>> sudo mount --bind /path/to/source /srv/ftp/
+```
+
+接着重启vsftpd服务器就行了
+
+# 参考
+ 
 > (1) https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon
 
 > (2) http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html
+
+> (3) http://blog.chinaunix.net/uid-26263042-id-3230479.html
