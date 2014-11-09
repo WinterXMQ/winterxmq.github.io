@@ -1,0 +1,107 @@
+---
+layout: post
+title: "Arch Linux 下FTP服务器的搭建"
+date: 2014-11-08 16:10:51 +0000
+comments: true
+categories: Linux ArchLinux FTP
+---
+
+为了方便BBS测试的文件上传, 就此搭建FTP服务器
+
+# Install
+
+安装 `vsftpd`
+
+```bash
+>> sudo pacman -S vsftpd
+```
+
+启动 vsftpd 和 设置开机自启
+
+```bash
+>> sudo systemctl enable vsftpd
+>> sudo systemctl start vsftpd
+```
+
+# Configuration
+
+大多数的设置在 `/etc/vsftpd.conf`, 打开配置文件
+
+```bash
+>> sudo vim /etc/vsftpd.conf
+```
+
+启用上传功能, `write_enable=YES`
+
+开启本地用户登录功能, `local_enable=YES`
+
+开启IPV6支持
+
+```bash
+listen=NO
+listen_ipv6=YES
+```
+
+自定义端口, 增加配置 `listen_port=2211`, 打开防火墙
+
+```bash
+iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 2211 -j ACCEPT
+```
+
+增加用户设置
+
+```bash
+>> sudo htpasswd -c /etc/vsftpd/.passwd Username
+New password:
+Re-type new password:
+```
+
+若以后想增加用户, 可以使用 `sudo htpasswd /etc/vsftpd/.passwd Username`
+
+这种方式增加的用户应该是不能被认证的, 用如下命令生成的密码替换
+
+```bash
+>> openssl passwd -1
+```
+
+向PAM service注册认证数据库, `sudo vim /etc/pam.d/vsftpd`, 并增加如下内容
+
+```bash
+auth required pam_pwdfile.so pwdfile /etc/vsftpd/.passwd
+account required pam_permit.so
+```
+
+同时需要安装PAM对pwdfile的认证支持库, `sudo yaout pam_pwdfile`, Yaourt的安装见[Arch Linux 安装Aur包管理器Yaourt](/blog/2014/11/09/yaourt/)
+
+在系统中增加ftp虚拟用户
+
+```bash
+>> sudo useradd -d /srv/ftp -s/usr/bin/nologin -G ftp -M ftp
+```
+
+更改文件夹的所有人, `sudo chown -R ftp:ftp /srv/ftp`
+
+配置文件里增加如下信息
+
+```bash
+# pointing to the correct PAM service file
+pam_service_name=vsftpd
+write_enable=YES
+hide_ids=YES
+listen=YES
+connect_from_port_20=YES
+anonymous_enable=NO
+local_enable=YES
+dirmessage_enable=YES
+xferlog_enable=YES
+chroot_local_user=YES
+guest_enable=YES
+guest_username=virtual
+virtual_use_local_privs=YES
+```
+
+# 参考
+
+> (1) https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon
+
+> (2) http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html
