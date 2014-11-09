@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-08T15:03:39+00:00</updated>
+  <updated>2014-11-09T07:01:53+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,169 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Arch Linux 安装Aur包管理器Yaourt]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/09/yaourt/"/>
+    <updated>2014-11-09T06:07:30+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/09/yaourt</id>
+    <content type="html"><![CDATA[<p>(1) 安装Yourt包管理器, 首先添加软件源, <code>sudo vim /etc/pacman.conf</code>, 在文件尾增加如下内容</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>archlinuxcn<span class="o">]</span>
+</span><span class='line'><span class="c"># The Chinese Arch Linux communities packages.</span>
+</span><span class='line'><span class="nv">SigLevel</span> <span class="o">=</span> Optional TrustAll
+</span><span class='line'><span class="nv">Server</span>   <span class="o">=</span> http://repo.archlinuxcn.org/<span class="nv">$arch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) 更新缓存, <code>sudo pacman -Syy</code></p>
+
+<p>(3) 安装Yourt, <code>sudo pacman -S yaourt</code></p>
+
+<p>(4) 安装Aurvote, <code>sudo pacman -S aurvote</code></p>
+
+<p>(5) 配置aurvote, <code>aurvote --configure</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Arch Linux 下FTP服务器的搭建]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/08/ftp-setup/"/>
+    <updated>2014-11-08T16:10:51+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/08/ftp-setup</id>
+    <content type="html"><![CDATA[<p>为了方便BBS测试的文件上传, 就此搭建FTP服务器</p>
+
+<h1>Install</h1>
+
+<p>安装 <code>vsftpd</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo pacman -S vsftpd
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动 vsftpd 和 设置开机自启</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo systemctl <span class="nb">enable </span>vsftpd
+</span><span class='line'>&gt;&gt; sudo systemctl start vsftpd
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Configuration</h1>
+
+<p>大多数的设置在 <code>/etc/vsftpd.conf</code>, 打开配置文件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /etc/vsftpd.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启用上传功能, <code>write_enable=YES</code></p>
+
+<p>开启本地用户登录功能, <code>local_enable=YES</code></p>
+
+<p>开启IPV6支持</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">listen</span><span class="o">=</span>NO
+</span><span class='line'><span class="nv">listen_ipv6</span><span class="o">=</span>YES
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自定义端口, 增加配置 <code>listen_port=2211</code>, 打开防火墙</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport <span class="m">2211</span> -j ACCEPT
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>增加用户设置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo htpasswd -c /etc/vsftpd/.passwd Username
+</span><span class='line'>New password:
+</span><span class='line'>Re-type new password:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若以后想增加用户, 可以使用 <code>sudo htpasswd /etc/vsftpd/.passwd Username</code></p>
+
+<p>这种方式增加的用户应该是不能被认证的, 用如下命令生成的密码替换</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; openssl passwd -1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>向PAM service注册认证数据库, <code>sudo vim /etc/pam.d/vsftpd</code>, 并增加如下内容</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>auth required pam_pwdfile.so pwdfile /etc/vsftpd/.passwd
+</span><span class='line'>account required pam_permit.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同时需要安装PAM对pwdfile的认证支持库, <code>sudo yaout pam_pwdfile</code>, Yaourt的安装见<a href="http://WinterXMQ.github.io/blog/2014/11/09/yaourt/">Arch Linux 安装Aur包管理器Yaourt</a></p>
+
+<p>在系统中增加ftp虚拟用户</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo useradd -d /srv/ftp -s/usr/bin/nologin -G ftp -M ftp
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更改文件夹的所有人, <code>sudo chown -R ftp:ftp /srv/ftp</code></p>
+
+<p>配置文件里增加如下信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># pointing to the correct PAM service file</span>
+</span><span class='line'><span class="nv">pam_service_name</span><span class="o">=</span>vsftpd
+</span><span class='line'><span class="nv">write_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">hide_ids</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">listen</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">connect_from_port_20</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">anonymous_enable</span><span class="o">=</span>NO
+</span><span class='line'><span class="nv">local_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">dirmessage_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">xferlog_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">chroot_local_user</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">guest_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">guest_username</span><span class="o">=</span>virtual
+</span><span class='line'><span class="nv">virtual_use_local_privs</span><span class="o">=</span>YES
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考</h1>
+
+<blockquote><p>(1) <a href="https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon">https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon</a></p>
+
+<p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[BBS的本地测试环境的搭建]]></title>

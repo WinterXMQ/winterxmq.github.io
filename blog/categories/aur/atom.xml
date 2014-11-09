@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: aur | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/aur/atom.xml" rel="self"/>
+  <link href="http://WinterXMQ.github.io/"/>
+  <updated>2014-11-09T07:01:53+00:00</updated>
+  <id>http://WinterXMQ.github.io/</id>
+  <author>
+    <name><![CDATA[WinterXMQ]]></name>
+    <email><![CDATA[WinterXMQ@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Arch Linux 安装Aur包管理器Yaourt]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/09/yaourt/"/>
+    <updated>2014-11-09T06:07:30+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/09/yaourt</id>
+    <content type="html"><![CDATA[<p>(1) 安装Yourt包管理器, 首先添加软件源, <code>sudo vim /etc/pacman.conf</code>, 在文件尾增加如下内容</p>
+
+<pre><code class="bash">[archlinuxcn]
+# The Chinese Arch Linux communities packages.
+SigLevel = Optional TrustAll
+Server   = http://repo.archlinuxcn.org/$arch
+</code></pre>
+
+<p>(2) 更新缓存, <code>sudo pacman -Syy</code></p>
+
+<p>(3) 安装Yourt, <code>sudo pacman -S yaourt</code></p>
+
+<p>(4) 安装Aurvote, <code>sudo pacman -S aurvote</code></p>
+
+<p>(5) 配置aurvote, <code>aurvote --configure</code></p>
+]]></content>
+  </entry>
+  
+</feed>

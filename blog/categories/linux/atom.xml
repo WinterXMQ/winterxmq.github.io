@@ -4,7 +4,7 @@
   <title><![CDATA[Category: linux | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-08T15:03:39+00:00</updated>
+  <updated>2014-11-09T07:01:53+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,126 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Arch Linux 安装Aur包管理器Yaourt]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/09/yaourt/"/>
+    <updated>2014-11-09T06:07:30+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/09/yaourt</id>
+    <content type="html"><![CDATA[<p>(1) 安装Yourt包管理器, 首先添加软件源, <code>sudo vim /etc/pacman.conf</code>, 在文件尾增加如下内容</p>
+
+<pre><code class="bash">[archlinuxcn]
+# The Chinese Arch Linux communities packages.
+SigLevel = Optional TrustAll
+Server   = http://repo.archlinuxcn.org/$arch
+</code></pre>
+
+<p>(2) 更新缓存, <code>sudo pacman -Syy</code></p>
+
+<p>(3) 安装Yourt, <code>sudo pacman -S yaourt</code></p>
+
+<p>(4) 安装Aurvote, <code>sudo pacman -S aurvote</code></p>
+
+<p>(5) 配置aurvote, <code>aurvote --configure</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Arch Linux 下FTP服务器的搭建]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/08/ftp-setup/"/>
+    <updated>2014-11-08T16:10:51+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/08/ftp-setup</id>
+    <content type="html"><![CDATA[<p>为了方便BBS测试的文件上传, 就此搭建FTP服务器</p>
+
+<h1>Install</h1>
+
+<p>安装 <code>vsftpd</code></p>
+
+<pre><code class="bash">&gt;&gt; sudo pacman -S vsftpd
+</code></pre>
+
+<p>启动 vsftpd 和 设置开机自启</p>
+
+<pre><code class="bash">&gt;&gt; sudo systemctl enable vsftpd
+&gt;&gt; sudo systemctl start vsftpd
+</code></pre>
+
+<h1>Configuration</h1>
+
+<p>大多数的设置在 <code>/etc/vsftpd.conf</code>, 打开配置文件</p>
+
+<pre><code class="bash">&gt;&gt; sudo vim /etc/vsftpd.conf
+</code></pre>
+
+<p>启用上传功能, <code>write_enable=YES</code></p>
+
+<p>开启本地用户登录功能, <code>local_enable=YES</code></p>
+
+<p>开启IPV6支持</p>
+
+<pre><code class="bash">listen=NO
+listen_ipv6=YES
+</code></pre>
+
+<p>自定义端口, 增加配置 <code>listen_port=2211</code>, 打开防火墙</p>
+
+<pre><code class="bash">iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 2211 -j ACCEPT
+</code></pre>
+
+<p>增加用户设置</p>
+
+<pre><code class="bash">&gt;&gt; sudo htpasswd -c /etc/vsftpd/.passwd Username
+New password:
+Re-type new password:
+</code></pre>
+
+<p>若以后想增加用户, 可以使用 <code>sudo htpasswd /etc/vsftpd/.passwd Username</code></p>
+
+<p>这种方式增加的用户应该是不能被认证的, 用如下命令生成的密码替换</p>
+
+<pre><code class="bash">&gt;&gt; openssl passwd -1
+</code></pre>
+
+<p>向PAM service注册认证数据库, <code>sudo vim /etc/pam.d/vsftpd</code>, 并增加如下内容</p>
+
+<pre><code class="bash">auth required pam_pwdfile.so pwdfile /etc/vsftpd/.passwd
+account required pam_permit.so
+</code></pre>
+
+<p>同时需要安装PAM对pwdfile的认证支持库, <code>sudo yaout pam_pwdfile</code>, Yaourt的安装见<a href="/blog/2014/11/09/yaourt/">Arch Linux 安装Aur包管理器Yaourt</a></p>
+
+<p>在系统中增加ftp虚拟用户</p>
+
+<pre><code class="bash">&gt;&gt; sudo useradd -d /srv/ftp -s/usr/bin/nologin -G ftp -M ftp
+</code></pre>
+
+<p>更改文件夹的所有人, <code>sudo chown -R ftp:ftp /srv/ftp</code></p>
+
+<p>配置文件里增加如下信息</p>
+
+<pre><code class="bash"># pointing to the correct PAM service file
+pam_service_name=vsftpd
+write_enable=YES
+hide_ids=YES
+listen=YES
+connect_from_port_20=YES
+anonymous_enable=NO
+local_enable=YES
+dirmessage_enable=YES
+xferlog_enable=YES
+chroot_local_user=YES
+guest_enable=YES
+guest_username=virtual
+virtual_use_local_privs=YES
+</code></pre>
+
+<h1>参考</h1>
+
+<blockquote><p>(1) <a href="https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon">https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon</a></p>
+
+<p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[BBS的本地测试环境的搭建]]></title>
@@ -573,267 +693,6 @@ extension=pdo_mysql.so
 <h1>参考文献</h1>
 
 <p><a href="https://wiki.archlinux.org/index.php/Apache">https://wiki.archlinux.org/index.php/Apache</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Debian上搭建ShadowSocks服务]]></title>
-    <link href="http://WinterXMQ.github.io/blog/2014/10/15/debian-shadowsocks/"/>
-    <updated>2014-10-15T11:46:04+00:00</updated>
-    <id>http://WinterXMQ.github.io/blog/2014/10/15/debian-shadowsocks</id>
-    <content type="html"><![CDATA[<p>在DigitalOcean上搭建好Droplet后的第一件事就是搭建ShadowSocks服务, 用ShadowSocks翻墙时最受不了的就是服务器失效, 所以最靠谱的就是自己搭建一个</p>
-
-<p>采用ShadowSocks的libev版本, 这个版本的特点是内存占用小(600k左右),使用libev和C编写，低CPU消耗，甚至可以安装在基于OpenWRT的路由器上<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
-
-<p>这篇博客有借鉴价值, 对于Debian、Ubuntu、Arch等意义并不大, 这个发行版都有源</p>
-
-<h1>Install</h1>
-
-<p>关于之前提到的三个发行版(Debian, Ubuntu, Arch), Debian和Ubuntu的情况差不多, 不过Ubuntu已经很久不玩了, 也不清楚什么状况, Arch相关的安装配置以后补上</p>
-
-<h2>Debian源的配置</h2>
-
-<p>ShadowSocks不在官方源里, 需要额外配置<sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup></p>
-
-<pre><code class="bash">&gt;&gt; sudo vim /etc/apt/sources.list
-</code></pre>
-
-<p>按照系统的版本增加源, Debian Wheezy指的是Debian 7</p>
-
-<pre><code class="bash"># Debian Wheezy, Ubuntu 12.04 or any distribution with libssl &gt; 1.0.1
-deb http://shadowsocks.org/debian wheezy main
-
-# Debian Squeeze, Ubuntu 11.04, or any distribution with libssl &gt; 0.9.8, but &lt; 1.0.0
-deb http://shadowsocks.org/debian squeeze main
-</code></pre>
-
-<p>增加完后更新缓存</p>
-
-<pre><code class="bash">&gt;&gt; sudo apt-get update
-</code></pre>
-
-<h2>Install &amp;&amp; Configure &amp;&amp; Start Service</h2>
-
-<blockquote><p>Debian</p></blockquote>
-
-<p>采用如下命令安装shadowsocks-libev</p>
-
-<pre><code class="bash">&gt;&gt; sudo apt-get install shadowsocks
-</code></pre>
-
-<p>安装完后, 编辑配置文件, 设定监听地址、端口、密码以及加密方式, 然后启动服务</p>
-
-<pre><code class="bash"># Edit the configuration
-&gt;&gt; sudo vim /etc/shadowsocks/config.json
-
-# Start the service
-&gt;&gt; sudo /etc/init.d/shadowsocks start
-</code></pre>
-
-<h2>检测</h2>
-
-<p>通过如下命令检测服务是否开启</p>
-
-<pre><code class="bash">&gt;&gt; ps -ef | grep ss-server | grep -v ps | grep -v grep
-</code></pre>
-
-<p>也可以检测端口是否被监听来判断</p>
-
-<pre><code class="bash">&gt;&gt; netstat -antl
-</code></pre>
-
-<h1>Configure</h1>
-
-<h2>General</h2>
-
-<p>配置文件的内容如下</p>
-
-<pre><code class="bash">{
-    "server":"my_server_ip",
-    "server_port":8388,
-    "local_address": "127.0.0.1",
-    "local_port":1080,
-    "password":"mypassword",
-    "timeout":300,
-    "method":"aes-256-cfb",
-    "fast_open": false,
-    "workers": 1
-}
-</code></pre>
-
-<p>其中 <code>server</code> 是ShadowSocks监听的ip, 一般设置成服务器的公网IP; <code>server_port</code> 是ShadowSocks监听的端口, 据说拉低端口号会提高速度, 有一些人比较极端的会设置成443(https的端口); <code>password</code> 应该不用说了; <code>method</code> ShadooSocks支持很多中加密方式, 有些安全但速度比较慢, 有些不太安全但速度快, 看你怎么选择<sup id="fnref:3"><a href="#fn:3" rel="footnote">3</a></sup></p>
-
-<h2>IPV4 And IPV6</h2>
-
-<p>因为在学校里有IPV6的环境, 方便在没有网络的时候可以采用IPV6来上网</p>
-
-<p>如果把 <code>server</code> 设置成服务器的公网IP, 那就只能适用IPV4连接, 如果设置成服务器的IPV6地址, 那就只能IPV6连接, 为此还查了一番, 这个问题比较好解决, 按照这样设置即可 <code>"server": "::"</code></p>
-
-<p>如此设置时的确可以完成同时响应IPV4和IPV6, 但是在查看端口监听的时候只能发现程序监听了IPV6</p>
-
-<pre><code class="bash">&gt;&gt; netstat -antl | grep "server_port"
-tcp6       0      0 :::2299                 :::*                    LISTEN
-</code></pre>
-
-<h2>统计流量</h2>
-
-<p>由于我希望同时监听IPV4和IPV6, 而接下来要介绍的方法我不敢保证是否支持这一特性, 同时我也暂时没有时间, 因此没有测试, 仅供参考, 来自于<a href="http://yzs.me/"></a>的<a href="http://yzs.me/2230.html">利用IPTABLES对Shadowsocks统计流量</a></p>
-
-<p>原理: ShadowSocks监听内网地址, 通过iptables的网络转发功能把数据转发到内网地址上来实现</p>
-
-<p>1) 添加一个loop back用的内网IP</p>
-
-<pre><code class="bash">&gt;&gt; ifconfig eth0:ss1 10.10.10.10 netmask 255.255.255.0 up
-</code></pre>
-
-<p><strong>注意:</strong></p>
-
-<ol>
-<li><p>网卡名不是eth0的自己修改</p></li>
-<li><p>以这种形式增加的内网地址在重启后会失效, 可以修改网卡的配置文件(/etc/network/interfaces或/etc/sysconfig/network-scripts/)添加IP，或者把添加IP的命令加到/etc/rc.local里面</p></li>
-</ol>
-
-
-<p>2) 修改ShadowSocks监听的网络, 并重启 <code>sudo service shadowsocks restart</code></p>
-
-<pre><code class="bash">"server":"10.10.10.10",
-</code></pre>
-
-<p>3) 开启系统的IPV4转发功能</p>
-
-<pre><code class="bash">&gt;&gt; sudo vim /etc/sysctl.conf
-</code></pre>
-
-<p>确保 <code>net.ipv4.ip_forward = 1</code> 前没有 <code>#</code></p>
-
-<p>如果有修改, 执行 <code>sudo sysctl -p</code> 使之生效</p>
-
-<p>4) iptables 设置转发</p>
-
-<pre><code class="bash">&gt;&gt; iptables -t nat -I PREROUTING -p tcp --dport SERVER_PORT -j DNAT --to-destination 10.10.10.10
-</code></pre>
-
-<p>5) 设置统计流量</p>
-
-<p>统计内网地址的入网和出网的流量</p>
-
-<pre><code class="bash">&gt;&gt; iptables -I INPUT -d 10.10.10.10
-&gt;&gt; iptables -I OUTPUT -s 10.10.10.10
-</code></pre>
-
-<p>查询流量</p>
-
-<pre><code class="bash">&gt;&gt; iptables -L -n -v
-</code></pre>
-
-<p><strong>注意:</strong></p>
-
-<p>这样设置无法清空10.10.10.10的统计数据, 解决办法: 因为加入到FORWARD里面了，不能直接-Z，否则会全部清零，如果要清零单条，最好创建另一个链，把这个记录加入那个链中，再把那个链加入FORWARD中，清零是直接iptables -Z 链名称就行了</p>
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>参考自<a href="http://teddysun.com/">秋水逸冰</a>的<a href="http://teddysun.com/358.html">Debian下shadowsocks-libev一键安装脚本</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-<li id="fn:2">
-<p>参考自<a href="https://github.com/madeye/shadowsocks-libev">ShadowSocks-libev</a>的<a href="https://github.com/madeye/shadowsocks-libev#install-from-repository">Install from repository</a>, 包括两份版本的Debian和Ubuntu的源<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
-<li id="fn:3">
-<p>参考自<a href="https://github.com/clowwindy/shadowsocks#configuration">shadowsocks-libev作者的Github</a>, 里面有具体的说明<a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
-</ol>
-</div>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Debian上开启VPN(PPTP)服务]]></title>
-    <link href="http://WinterXMQ.github.io/blog/2014/10/11/debian-vpn/"/>
-    <updated>2014-10-11T10:37:11+00:00</updated>
-    <id>http://WinterXMQ.github.io/blog/2014/10/11/debian-vpn</id>
-    <content type="html"><![CDATA[<p>有了纽约的服务器貌似必须开启代理模式, 虽然ShadowSocks要比VPN好多了, 但毕竟需要额外的软件或者额外的硬件, 而VPN的客户端却是各种平台上预先搭载的, 因此就有了想搭建VPN的想法, 开动&hellip;..</p>
-
-<p>1.First, 安装pptp的服务端</p>
-
-<pre><code class="bash">&gt;&gt; sudo apt-get install pptpd
-</code></pre>
-
-<p>2.Second, 配置在VPN模式下各主机的IP, <code>localip</code> 指的是VPN模式下PPTP服务器的IP, <code>remoteip</code> 指的是连接到PPTP服务器上的客户端的IP, 通常是一段范围, 编辑文件 <code>sudo vim /etc/pptpd.conf</code>, 在文件最后加上类似代码, 具体参数自定</p>
-
-<pre><code class="bash">localip 192.168.92.1
-remoteip 192.168.92.11-16
-</code></pre>
-
-<p>3.Third, 编辑PPTP服务器参数, 参照如下参数配置, 编辑文件 <code>sudo vim /etc/pptpd.conf</code></p>
-
-<pre><code class="bash">name pptpd
-refuse-pap
-refuse-chap
-refuse-mschap
-require-mschap-v2
-require-mppe-128
-ms-dns 8.8.8.8
-ms-dns 8.8.4.4
-#nodefaultroute
-#debug
-#dump
-proxyarp
-lock
-nobsdcomp
-#nologfd
-logfile /var/log/pptpd.log
-</code></pre>
-
-<p><strong>说明:</strong></p>
-
-<ul>
-<li><p>name pptpd：pptpd server的名称</p></li>
-<li><p>refuse-pap：拒绝pap身份验证模式</p></li>
-<li><p>refuse-chap：拒绝chap身份验证模式</p></li>
-<li><p>refuse-mschap：拒绝mschap身份验证模式</p></li>
-<li><p>require-mschap-v2：在端点进行连接握手时需要使用微软的mschap-v2进行自身验证</p></li>
-<li><p>require-mppe-128：MPPE 模块使用 128 位加密</p></li>
-<li><p>ms-dns 8.8.8.8：ppp为Windows客户端提供DNS服务器IP地址，第一个ms-dns为DNS Master，第二个为DNS Slave, 此处选用的DNS是Google的</p></li>
-<li><p>proxyarp：建立 ARP 代理键值</p></li>
-<li><p>lock：锁定客户端 PTY 设备文件</p></li>
-<li><p>nobsdcomp：禁用 BSD 压缩模式</p></li>
-<li><p>nologfd：禁止将错误信息记录到标准错误输出设备(stderr)</p></li>
-</ul>
-
-
-<p>4.设置用户, 编辑文件 <code>sudo vim /etc/ppp/chap-secrets</code>, 增加这样的条目 <code>username pptpd password *</code>, 其中 username 和 password 是登录口令, pptpd是服务器上PPTP软件名(默认不动), * 指代接受的IP地址</p>
-
-<p>5.全部搞定后，我们需要重启 pptpd 服务使新配置生效 <code>sudo /etc/init.d/pptpd restart</code></p>
-
-<p>如果这时候尝试连接的话是可以连上的，但是只能访问机器资源，不能上网，想上网的话需要继续配置。</p>
-
-<p>6.配置IPV4的转发</p>
-
-<p>编辑文件 <code>sudo vim /etc/sysctl.conf</code>, 修改信息如下</p>
-
-<pre><code class="bash">#net.ipv4.ip_forward=1
-net.ipv4.ip_forward=1
-</code></pre>
-
-<p>然后执行 <code>sudo sysctl –p</code> 使得修改生效, 看命令执行后的信息反馈中有无 <code>net.ipv4.ip_forward = 1</code> 这一条</p>
-
-<p>7.防火墙iptable信息转发</p>
-
-<pre><code class="bash">&gt;&gt; iptables -t nat -A POSTROUTING -s 192.168.9.0/24 -o eth0 -j MASQUERADE
-</code></pre>
-
-<p>8.查看端口是否打开</p>
-
-<pre><code class="bash">&gt;&gt; netstat -antl
-</code></pre>
-
-<hr />
-
-<p>参考资料:</p>
-
-<ol>
-<li><p>Linux（VPS+Debian）搭建配置VPN（PPTP）服务 <a href="http://blog.csdn.net/frymgump/article/details/7346840">http://blog.csdn.net/frymgump/article/details/7346840</a></p></li>
-<li><p>Debian搭建vpn <a href="http://www.cnblogs.com/timeship/archive/2013/03/09/2951184.html">http://www.cnblogs.com/timeship/archive/2013/03/09/2951184.html</a></p></li>
-</ol>
-
 ]]></content>
   </entry>
   

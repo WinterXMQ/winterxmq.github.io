@@ -9,10 +9,11 @@
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="apache, discuz, linux Comments BBS的本地测试环境的搭建 本地环境的LAMP环境安装见ArchLinux上搭建LAMP环境 这个地方主要讲bbs的备份和本地还原 服务器备份 文档数据的备份 1
+	<meta name="description" content="archlinux, aur, linux, yaourt Comments Arch Linux 安装Aur包管理器Yaourt (1) 安装Yourt包管理器, 首先添加软件源, sudo vim /etc/pacman.conf, 在文件尾增加如下内容 1
 2
-&gt;&gt; cd /var/www
-&gt;&gt; tar &hellip;">
+3
+4
+[ &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -104,6 +105,225 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-09T06:07:30+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/archlinux/'>archlinux</a>, <a class='category' href='/blog/categories/aur/'>aur</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/yaourt/'>yaourt</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/11/09/yaourt/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/11/09/yaourt/" itemprop="url">Arch Linux 安装Aur包管理器Yaourt</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>(1) 安装Yourt包管理器, 首先添加软件源, <code>sudo vim /etc/pacman.conf</code>, 在文件尾增加如下内容</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>archlinuxcn<span class="o">]</span>
+</span><span class='line'><span class="c"># The Chinese Arch Linux communities packages.</span>
+</span><span class='line'><span class="nv">SigLevel</span> <span class="o">=</span> Optional TrustAll
+</span><span class='line'><span class="nv">Server</span>   <span class="o">=</span> http://repo.archlinuxcn.org/<span class="nv">$arch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) 更新缓存, <code>sudo pacman -Syy</code></p>
+
+<p>(3) 安装Yourt, <code>sudo pacman -S yaourt</code></p>
+
+<p>(4) 安装Aurvote, <code>sudo pacman -S aurvote</code></p>
+
+<p>(5) 配置aurvote, <code>aurvote --configure</code></p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-08T16:10:51+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/archlinux/'>archlinux</a>, <a class='category' href='/blog/categories/ftp/'>ftp</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/11/08/ftp-setup/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/11/08/ftp-setup/" itemprop="url">Arch Linux 下FTP服务器的搭建</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>为了方便BBS测试的文件上传, 就此搭建FTP服务器</p>
+
+<h1>Install</h1>
+
+<p>安装 <code>vsftpd</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo pacman -S vsftpd
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动 vsftpd 和 设置开机自启</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo systemctl <span class="nb">enable </span>vsftpd
+</span><span class='line'>&gt;&gt; sudo systemctl start vsftpd
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Configuration</h1>
+
+<p>大多数的设置在 <code>/etc/vsftpd.conf</code>, 打开配置文件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /etc/vsftpd.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启用上传功能, <code>write_enable=YES</code></p>
+
+<p>开启本地用户登录功能, <code>local_enable=YES</code></p>
+
+<p>开启IPV6支持</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">listen</span><span class="o">=</span>NO
+</span><span class='line'><span class="nv">listen_ipv6</span><span class="o">=</span>YES
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自定义端口, 增加配置 <code>listen_port=2211</code>, 打开防火墙</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport <span class="m">2211</span> -j ACCEPT
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>增加用户设置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo htpasswd -c /etc/vsftpd/.passwd Username
+</span><span class='line'>New password:
+</span><span class='line'>Re-type new password:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若以后想增加用户, 可以使用 <code>sudo htpasswd /etc/vsftpd/.passwd Username</code></p>
+
+<p>这种方式增加的用户应该是不能被认证的, 用如下命令生成的密码替换</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; openssl passwd -1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>向PAM service注册认证数据库, <code>sudo vim /etc/pam.d/vsftpd</code>, 并增加如下内容</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>auth required pam_pwdfile.so pwdfile /etc/vsftpd/.passwd
+</span><span class='line'>account required pam_permit.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同时需要安装PAM对pwdfile的认证支持库, <code>sudo yaout pam_pwdfile</code>, Yaourt的安装见<a href="/blog/2014/11/09/yaourt/">Arch Linux 安装Aur包管理器Yaourt</a></p>
+
+<p>在系统中增加ftp虚拟用户</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo useradd -d /srv/ftp -s/usr/bin/nologin -G ftp -M ftp
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更改文件夹的所有人, <code>sudo chown -R ftp:ftp /srv/ftp</code></p>
+
+<p>配置文件里增加如下信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># pointing to the correct PAM service file</span>
+</span><span class='line'><span class="nv">pam_service_name</span><span class="o">=</span>vsftpd
+</span><span class='line'><span class="nv">write_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">hide_ids</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">listen</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">connect_from_port_20</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">anonymous_enable</span><span class="o">=</span>NO
+</span><span class='line'><span class="nv">local_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">dirmessage_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">xferlog_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">chroot_local_user</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">guest_enable</span><span class="o">=</span>YES
+</span><span class='line'><span class="nv">guest_username</span><span class="o">=</span>virtual
+</span><span class='line'><span class="nv">virtual_use_local_privs</span><span class="o">=</span>YES
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>参考</h1>
+
+<blockquote><p>(1) <a href="https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon">https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon</a></p>
+
+<p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p></blockquote>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1591,370 +1811,6 @@
 <p>看了CSS中关于Media的介绍后才豁然开朗, 以前用JS来解决屏幕大小的适应性问题用这种办法可以很简单的解决。<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
 </ol>
 </div>
-
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-06T06:36:11+00:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/system/'>system</a>, <a class='category' href='/blog/categories/vbox/'>vbox</a>
-
-
-</div>
-		
-			<span class="comments"><a href="/blog/2014/10/06/vbox-linux-file-share/#disqus_thread">Comments</a></span>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/10/06/vbox-linux-file-share/" itemprop="url">VBox下Linux与主机Windows的文件共享</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>本文的方法参考自<a href="http://blog.csdn.net/jakiechen68/article/details/7263023" title="Blog_VBox-Linux 文件共享">jakiechen</a>, 有什么不对的地方请大家指点。</p>
-
-<p>适用对象: VBox下 子系统为Linux, 安装了增强工具包(virtualbox-guest-utils in Arch Linux)</p>
-
-<ol>
-<li>VBox 下设置共享文件夹</li>
-</ol>
-
-
-<p>在VBox下设置一个共享文件夹, 菜单栏 -> 设备 -> 共享文件夹, 在 &lsquo;共享文件夹列表&rsquo; 下增加一个固定分配。</p>
-
-<p>选择共享文件夹, 设置共享文件夹名称(不要含中文或者其他方块字)。</p>
-
-<p><strong>注意:</strong> 1. 要记住共享文件夹的名字, 不要随意变更, 这个和Linux中的设置有关, 2. 不要选择 <code>Auto-mount</code> 即自动挂载<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
-
-<p><img class="center" src="/p/pic/file_share_1.png" title="增加共享文件夹" ></p>
-
-<p><img class="center" src="/p/pic/file_share_2.png" title="增加共享文件夹列表" ></p>
-
-<ol>
-<li>Linux 下挂载</li>
-</ol>
-
-
-<p>创建文件夹 <code>mkdir -p /mnt/share</code></p>
-
-<p>挂载共享文件夹 <code>sudo mount -t vboxsf Tex /mnt/share</code></p>
-
-<p>然后就可以在 <code>/mnt/share</code> 下看到恭喜文件夹里的内容了</p>
-
-<p><em>为了方便管理, 我把这个文件夹软连接到我的工作文件夹下了, <code>ln -s /mnt/share ~/Code/tex</code></em></p>
-
-<ol>
-<li>设置自动挂载</li>
-</ol>
-
-
-<p>为了方便使用, 将其设置成自动挂载</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo vim /etc/fstab
-</span><span class='line'>Add following
-</span><span class='line'><span class="c"># VBox share file</span>
-</span><span class='line'>Tex     /mnt/share  vboxsf  rw,gid<span class="o">=</span>100,uid<span class="o">=</span>1000,auto    <span class="m">0</span> 0
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>参考自jakiechen, 上面说在下次重启后会出现由于共享文件夹为空而挂载失败, 出现的错误提示为: /sbin/mount.vboxsf: mounting failed with the error: Invalid argument<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
-</div>
-
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-28T12:52:34+00:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/octopress/'>octopress</a>, <a class='category' href='/blog/categories/rake/'>rake</a>
-
-
-</div>
-		
-			<span class="comments"><a href="/blog/2014/09/28/octopress-new-post-feature-add-p1/#disqus_thread">Comments</a></span>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/09/28/octopress-new-post-feature-add-p1/" itemprop="url">Octopress特性设置-新建Blog脚本功能定制</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<h1>新建Blog并自动使用vim打开新建文档</h1>
-
-<hr />
-
-<p>在使用 <code>rake new_post</code> 或者 <code>rake new_post['title']</code> 后, 需要手动打开新建的Makedown文件, 太过于繁琐</p>
-
-<p>Octopress是采用Ruby make脚本即rake来完成的, 因此只需要修改Ruby的任务脚本 <code>Rakefile</code> 即可</p>
-
-<p>首先, 现在脚本文件的开头位置定义编辑器</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>...
-</span><span class='line'>require <span class="s2">&quot;stringex&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Editor_config</span>
-</span><span class='line'><span class="nv">editor</span> <span class="o">=</span> <span class="s2">&quot;vim&quot;</span>
-</span><span class='line'>...
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>然后再每个new_post的任务结尾处加上下述代码</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>...
-</span><span class='line'>task :new_post, :title <span class="k">do</span> <span class="p">|</span>t, args<span class="p">|</span>
-</span><span class='line'>...
-</span><span class='line'>  end
-</span><span class='line'>  <span class="k">if</span> <span class="c">#{editor}</span>
-</span><span class='line'>    system <span class="s2">&quot;#{editor} #{filename}&quot;</span>
-</span><span class='line'>  end
-</span><span class='line'>end
-</span><span class='line'>...
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注: new_page任务中也需要同样的设置(虽然还不知道这个任务是干什么的)</p>
-
-<h1>新建Blog时支持文件名和Blog的title分离</h1>
-
-<hr />
-
-<p>在Octopress中写Blog, 时常会出现新建完Blog后还要去修改Title, 虽然没有什么问题, 但总需要这么做就显得有点麻烦, 按照Octopress管理Blog的形式在Rake的任务脚本中自定义Rake任务, 自定义过程如下</p>
-
-<p>这个任务与普通的new_post任务差别不大, 主要在于接受的参数多了一个, 此外在创建文件的文件名和写入文件的title名有区别而已, 在Rakefile中加入如下代码</p>
-
-<figure class='code'><figcaption><span>post.rb  (2014-10-03-new-post-add-post.rb)</span> <a href='/p/code/2014-10-03-new-post-add-post.rb'>download</a></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">usage</span> <span class="n">rake</span> <span class="n">post</span><span class="o">[</span><span class="nb">name</span><span class="p">,</span><span class="n">title</span><span class="o">]</span> <span class="ow">or</span> <span class="n">rake</span> <span class="n">post</span><span class="o">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;title&#39;</span><span class="o">]</span> <span class="ow">or</span> <span class="n">rake</span> <span class="n">post</span><span class="o">[</span><span class="n">title</span><span class="o">]</span> <span class="ow">or</span> <span class="n">rake</span> <span class="n">post</span><span class="p">(</span><span class="n">default</span> <span class="n">to</span> <span class="n">post</span><span class="p">)</span>
-</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Begin a new post in </span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="n">task</span> <span class="ss">:post</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:title</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
-</span><span class='line'>  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="k">else</span>
-</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">get_stdin</span><span class="p">(</span><span class="s2">&quot;Enter a filename for your post:&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
-</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span>
-</span><span class='line'>  <span class="k">else</span>
-</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">get_stdin</span><span class="p">(</span><span class="s2">&quot;Enter a title for your post:&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">posts_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="nb">name</span><span class="o">.</span><span class="n">to_url</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">new_post_ext</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Creating new post: </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;---&quot;</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;layout: post&quot;</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;title: </span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">title</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/&amp;/</span><span class="p">,</span><span class="s1">&#39;&amp;amp;&#39;</span><span class="p">)</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;date: </span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d %H:%M:%S %z&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;comments: true&quot;</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;categories: &quot;</span>
-</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;---&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
-</span><span class='line'>    <span class="nb">system</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>增加自动新建Code的任务</h1>
-
-<hr />
-
-<p>Octopress总有新建Blog的任务, 当需要在Blog中插入大段代码时却需要手动新建代码文件, 略微显得有些蛋疼, 于是创建了这个任务</p>
-
-<p>Octopress中有 <code>include_code</code> 的功能, 而此次为Octopress增加的 <code>新建 Code</code> 的任务也是为了这个功能设置的</p>
-
-<h2>小幅修改 include_code</h2>
-
-<p>在 <code>include_code</code> 中只需要给出Code文件的文件名, 系统会在预先设定的源码文件夹中寻找文件</p>
-
-<p>因此, 第一点要修改源码的默认路径&lt;什么文件都要放在download下, 你不觉得很失败吗></p>
-
-<p>此处需要修改两个地方: 1) 站点配置文件 <code>_config.yml</code> 下的 <code>code_dir</code> 2) <code>include_code</code>功能的代码生成器 <code>plugins\include_code.rb</code>中的相关设定</p>
-
-<p>1) 对于这个没有什么好说明的, 只需要打开 <code>_config.yml</code>, 修改 <code>code_dir: p/code</code>, 唯一的<strong>注意点</strong>: 目录的前后都不要有 <code>/</code></p>
-
-<p>2) 需要替换 <code>plugins\include_code.rb</code> 中关于 <code>code_dir</code> 的默认设定</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default_dir</span> <span class="o">=</span> <span class="s1">&#39;p/code&#39;</span>
-</span><span class='line'><span class="c1"># code_dir = (context.registers[:site].config[&#39;code_dir&#39;].sub(/^\//,&#39;&#39;) || &#39;dowanload/code&#39;)</span>
-</span><span class='line'><span class="n">code_dir</span> <span class="o">=</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">registers</span><span class="o">[</span><span class="ss">:site</span><span class="o">].</span><span class="n">config</span><span class="o">[</span><span class="s1">&#39;code_dir&#39;</span><span class="o">].</span><span class="n">sub</span><span class="p">(</span><span class="sr">/^\//</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="n">default_dir</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>此外, 个人觉得在这个功能中只给出文件名有些不好, 因此就增加了同样支持给出完整的相对路径, 如 <code>p/code/filename</code>&lt;纯属蛋疼></p>
-
-<p>在 <code>plugins\include_code.rb</code> 中修改如下代码&lt;紧接着上面的代码></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="vi">@file</span><span class="o">.</span><span class="n">start_with?</span><span class="p">(</span><span class="n">code_dir</span><span class="p">)</span>
-</span><span class='line'>  <span class="vi">@file</span> <span class="o">=</span> <span class="vi">@file</span><span class="o">[</span><span class="n">code_dir</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="vi">@file</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>增加Rake任务 Code</h2>
-
-<p>完成了对 <code>include_code</code> 的改造, 紧接着要完成最重要的内容, 即新增任务, 在 <code>Rakefile</code> 中增加如下内容</p>
-
-<figure class='code'><figcaption><span>new-code.rb  (2014-10-04-new-post-new-code.rb)</span> <a href='/p/code/2014-10-04-new-post-new-code.rb'>download</a></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># usage rake code[name] or rake code[&#39;name&#39;] or rake code(default to code)</span>
-</span><span class='line'><span class="c1"># tack for new code files</span>
-</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Begin a new code file in </span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="n">task</span> <span class="ss">:code</span><span class="p">,</span> <span class="ss">:name</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
-</span><span class='line'>  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
-</span><span class='line'>  <span class="k">else</span>
-</span><span class='line'>    <span class="nb">name</span> <span class="o">=</span> <span class="n">get_stdin</span><span class="p">(</span><span class="s2">&quot;Enter a filename for your code:&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">raise</span> <span class="s2">&quot;### You haven&#39;t set anything up yet. First run `rake install` to set up an Octopress theme.&quot;</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">mkdir_p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="n">basicname</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">source_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">basicname</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">abort</span><span class="p">(</span><span class="s2">&quot;rake aborted!&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">ask</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> already exists. Do you want to overwrite?&quot;</span><span class="p">,</span> <span class="o">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="o">]</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">if</span> <span class="c1">#{editor}</span>
-</span><span class='line'>    <span class="nb">system</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">editor</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Created new post: </span><span class="si">#{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;{% include_code [filename] lang:Language </span><span class="si">#{</span><span class="n">basicname</span><span class="si">}</span><span class="s2"> %}&quot;</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;  or  {% include_code [filename] lang:Language </span><span class="si">#{</span><span class="n">code_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">basicname</span><span class="si">}</span><span class="s2"> %}&quot;</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;  can be used in blog markdown files.&quot;</span>
-</span><span class='line'>  <span class="k">else</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;File is canceled.&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
 		

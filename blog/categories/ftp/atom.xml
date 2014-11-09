@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ftp | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/ftp/atom.xml" rel="self"/>
+  <link href="http://WinterXMQ.github.io/"/>
+  <updated>2014-11-09T07:01:53+00:00</updated>
+  <id>http://WinterXMQ.github.io/</id>
+  <author>
+    <name><![CDATA[WinterXMQ]]></name>
+    <email><![CDATA[WinterXMQ@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Arch Linux 下FTP服务器的搭建]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/08/ftp-setup/"/>
+    <updated>2014-11-08T16:10:51+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/08/ftp-setup</id>
+    <content type="html"><![CDATA[<p>为了方便BBS测试的文件上传, 就此搭建FTP服务器</p>
+
+<h1>Install</h1>
+
+<p>安装 <code>vsftpd</code></p>
+
+<pre><code class="bash">&gt;&gt; sudo pacman -S vsftpd
+</code></pre>
+
+<p>启动 vsftpd 和 设置开机自启</p>
+
+<pre><code class="bash">&gt;&gt; sudo systemctl enable vsftpd
+&gt;&gt; sudo systemctl start vsftpd
+</code></pre>
+
+<h1>Configuration</h1>
+
+<p>大多数的设置在 <code>/etc/vsftpd.conf</code>, 打开配置文件</p>
+
+<pre><code class="bash">&gt;&gt; sudo vim /etc/vsftpd.conf
+</code></pre>
+
+<p>启用上传功能, <code>write_enable=YES</code></p>
+
+<p>开启本地用户登录功能, <code>local_enable=YES</code></p>
+
+<p>开启IPV6支持</p>
+
+<pre><code class="bash">listen=NO
+listen_ipv6=YES
+</code></pre>
+
+<p>自定义端口, 增加配置 <code>listen_port=2211</code>, 打开防火墙</p>
+
+<pre><code class="bash">iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 2211 -j ACCEPT
+</code></pre>
+
+<p>增加用户设置</p>
+
+<pre><code class="bash">&gt;&gt; sudo htpasswd -c /etc/vsftpd/.passwd Username
+New password:
+Re-type new password:
+</code></pre>
+
+<p>若以后想增加用户, 可以使用 <code>sudo htpasswd /etc/vsftpd/.passwd Username</code></p>
+
+<p>这种方式增加的用户应该是不能被认证的, 用如下命令生成的密码替换</p>
+
+<pre><code class="bash">&gt;&gt; openssl passwd -1
+</code></pre>
+
+<p>向PAM service注册认证数据库, <code>sudo vim /etc/pam.d/vsftpd</code>, 并增加如下内容</p>
+
+<pre><code class="bash">auth required pam_pwdfile.so pwdfile /etc/vsftpd/.passwd
+account required pam_permit.so
+</code></pre>
+
+<p>同时需要安装PAM对pwdfile的认证支持库, <code>sudo yaout pam_pwdfile</code>, Yaourt的安装见<a href="/blog/2014/11/09/yaourt/">Arch Linux 安装Aur包管理器Yaourt</a></p>
+
+<p>在系统中增加ftp虚拟用户</p>
+
+<pre><code class="bash">&gt;&gt; sudo useradd -d /srv/ftp -s/usr/bin/nologin -G ftp -M ftp
+</code></pre>
+
+<p>更改文件夹的所有人, <code>sudo chown -R ftp:ftp /srv/ftp</code></p>
+
+<p>配置文件里增加如下信息</p>
+
+<pre><code class="bash"># pointing to the correct PAM service file
+pam_service_name=vsftpd
+write_enable=YES
+hide_ids=YES
+listen=YES
+connect_from_port_20=YES
+anonymous_enable=NO
+local_enable=YES
+dirmessage_enable=YES
+xferlog_enable=YES
+chroot_local_user=YES
+guest_enable=YES
+guest_username=virtual
+virtual_use_local_privs=YES
+</code></pre>
+
+<h1>参考</h1>
+
+<blockquote><p>(1) <a href="https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon">https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon</a></p>
+
+<p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p></blockquote>
+]]></content>
+  </entry>
+  
+</feed>
