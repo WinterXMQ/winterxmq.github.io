@@ -1,0 +1,24 @@
+---
+layout: post
+title: "Arch Linux 安装Aur包管理器Yaourt"
+date: 2014-11-09 06:07:30 +0000
+comments: true
+categories: Linux ArchLinux AUR Yaourt
+---
+
+(1) 安装Yourt包管理器, 首先添加软件源, `sudo vim /etc/pacman.conf`, 在文件尾增加如下内容
+
+```bash
+[archlinuxcn]
+# The Chinese Arch Linux communities packages.
+SigLevel = Optional TrustAll
+Server   = http://repo.archlinuxcn.org/$arch
+```
+
+(2) 更新缓存, `sudo pacman -Syy`
+
+(3) 安装Yourt, `sudo pacman -S yaourt`
+
+(4) 安装Aurvote, `sudo pacman -S aurvote`
+
+(5) 配置aurvote, `aurvote --configure`
