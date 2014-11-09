@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-09T07:01:53+00:00</updated>
+  <updated>2014-11-09T07:36:35+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -168,11 +168,22 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>在用的过程中发现 FTP 不支持软链接的方式, 因此换成mount的方式来实现</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo mount --bind /path/to/source /srv/ftp/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接着重启vsftpd服务器就行了</p>
+
 <h1>参考</h1>
 
 <blockquote><p>(1) <a href="https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon">https://wiki.archlinux.org/index.php/Very_Secure_FTP_Daemon</a></p>
 
-<p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p></blockquote>
+<p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p>
+
+<p>(3) <a href="http://blog.chinaunix.net/uid-26263042-id-3230479.html">http://blog.chinaunix.net/uid-26263042-id-3230479.html</a></p></blockquote>
 ]]></content>
   </entry>
   
