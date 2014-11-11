@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-11T12:55:53+00:00</updated>
+  <updated>2014-11-11T16:26:56+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,58 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Windows8.1下管理功能失效]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/11/win-manage/"/>
+    <updated>2014-11-11T16:19:40+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/11/win-manage</id>
+    <content type="html"><![CDATA[<p>Windows 8.1 下 计算机的管理功能失效了, 按如下方法回复</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Windows Registry Editor Version 5.00
+</span><span class='line'><span class="o">[</span>HKEY_CLASSES_ROOT<span class="se">\C</span>LSID<span class="se">\{</span>20D04FE0-3AEA-1069-A2D8-08002B30309D<span class="o">}</span><span class="se">\s</span>hell<span class="se">\M</span>anage<span class="o">]</span>
+</span><span class='line'>@<span class="o">=</span>hex<span class="o">(</span>2<span class="o">)</span>:40,00,25,00,73,00,79,00,73,00,74,00,65,00,6d,00,72,00,6f,00,6f,00,74,<span class="se">\</span>
+</span><span class='line'>00,25,00,5c,00,73,00,79,00,73,00,74,00,65,00,6d,00,33,00,32,00,5c,00,6d,00,<span class="se">\</span>
+</span><span class='line'>79,00,63,00,6f,00,6d,00,70,00,75,00,74,00,2e,00,64,00,6c,00,6c,00,2c,00,2d,<span class="se">\</span>
+</span><span class='line'>00,34,00,30,00,30,00,00,00
+</span><span class='line'><span class="s2">&quot;MUIVerb&quot;</span><span class="o">=</span>hex<span class="o">(</span>2<span class="o">)</span>:40,00,25,00,73,00,79,00,73,00,74,00,65,00,6d,00,72,00,6f,00,<span class="se">\</span>
+</span><span class='line'>6f,00,74,00,25,00,5c,00,73,00,79,00,73,00,74,00,65,00,6d,00,33,00,32,00,5c,<span class="se">\</span>
+</span><span class='line'>00,6d,00,79,00,63,00,6f,00,6d,00,70,00,75,00,74,00,2e,00,64,00,6c,00,6c,00,<span class="se">\</span>
+</span><span class='line'>2c,00,2d,00,34,00,30,00,30,00,00,00
+</span><span class='line'><span class="s2">&quot;SuppressionPolicy&quot;</span><span class="o">=</span>dword:4000003c
+</span><span class='line'><span class="s2">&quot;HasLUAShield&quot;</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+</span><span class='line'><span class="o">[</span>HKEY_CLASSES_ROOT<span class="se">\C</span>LSID<span class="se">\{</span>20D04FE0-3AEA-1069-A2D8-08002B30309D<span class="o">}</span><span class="se">\s</span>hell<span class="se">\M</span>anage<span class="se">\c</span>ommand<span class="o">]</span>
+</span><span class='line'>@<span class="o">=</span>hex<span class="o">(</span>2<span class="o">)</span>:25,00,77,00,69,00,6e,00,64,00,69,00,72,00,25,00,5c,00,73,00,79,00,73,<span class="se">\</span>
+</span><span class='line'>00,74,00,65,00,6d,00,33,00,32,00,5c,00,6d,00,6d,00,63,00,2e,00,65,00,78,00,<span class="se">\</span>
+</span><span class='line'>65,00,20,00,2f,00,73,00,20,00,25,00,77,00,69,00,6e,00,64,00,69,00,72,00,25,<span class="se">\</span>
+</span><span class='line'>00,5c,00,73,00,79,00,73,00,74,00,65,00,6d,00,33,00,32,00,5c,00,63,00,6f,00,<span class="se">\</span>
+</span><span class='line'>6d,00,70,00,6d,00,67,00,6d,00,74,00,2e,00,6d,00,73,00,63,00,00,00
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>参考</p>
+
+<blockquote><p>[1] <a href="http://zhidao.baidu.com/link?url=BryEHZL7x2RGquDoxt1F4Z1NPPVmiFs9wMFd7Ny7HGiNECA9Dxedr84IKhe8rBu87V6dohBs6HRmzfw0kXZq7NRSlO2NcT3OuwdVtYBTBce">百度知道</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ArchLinux上磁盘扩展]]></title>
