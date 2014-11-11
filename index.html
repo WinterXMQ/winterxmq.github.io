@@ -9,11 +9,7 @@
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="archlinux, aur, linux, yaourt Comments Arch Linux 安装Aur包管理器Yaourt (1) 安装Yourt包管理器, 首先添加软件源, sudo vim /etc/pacman.conf, 在文件尾增加如下内容 1
-2
-3
-4
-[ &hellip;">
+	<meta name="description" content="archlinux, ext4, linux, lvm, vbox Comments ArchLinux上磁盘扩展 问题: 在VBox上创建ArchLinux虚拟机的时候就想着如果硬盘不够用, 就到时候再想办法扩容, 因此当时就只搞了8G的硬盘, 其中还有1G的Swap分区; &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -105,6 +101,425 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-10T14:13:44+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/archlinux/'>archlinux</a>, <a class='category' href='/blog/categories/ext4/'>ext4</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/lvm/'>lvm</a>, <a class='category' href='/blog/categories/vbox/'>vbox</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/11/10/extend-volume/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/11/10/extend-volume/" itemprop="url">ArchLinux上磁盘扩展</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>问题: 在VBox上创建ArchLinux虚拟机的时候就想着如果硬盘不够用, 就到时候再想办法扩容, 因此当时就只搞了8G的硬盘, 其中还有1G的Swap分区; 没想到这个问题这么快就出现了, 因此就有了一下的解决方案</p>
+
+<p>问题分析:</p>
+
+<p>由于虚拟磁盘采用的是 <code>VirtualBox Disk Image</code>, 同时在ArchLinux中没有逻辑磁盘(LVM)还有就是就是系统只有单个分区, 所以不适合采用另加磁盘的挂载方式来解决。</p>
+
+<p>问题解决方案:</p>
+
+<p>总体方案: 给 <code>/</code> 分区扩容, 分两步, 1) 先给虚拟磁盘扩容; 2) 再想办法给 <code>/</code> 分区扩容</p>
+
+<h1>VBox 的虚拟磁盘扩容</h1>
+
+<p>在 VBox 中有一个管理工具可以对磁盘扩容, 支持命令行, 操作更加简便</p>
+
+<p>查看 VBox 下注册的虚拟磁盘</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; VBoxManage list hdds
+</span><span class='line'>UUID:           a314bb2f-c879-4e1d-9669-251a5e49f54f
+</span><span class='line'>Parent UUID:    base
+</span><span class='line'>State:          locked write
+</span><span class='line'>Type:           normal <span class="o">(</span>base<span class="o">)</span>
+</span><span class='line'>Location:       C:<span class="se">\O</span>S<span class="se">\A</span>rch_Box<span class="se">\A</span>rchV.vdi
+</span><span class='line'>Storage format: VDI
+</span><span class='line'>Capacity:       <span class="m">20480</span> MBytes
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>便可得到磁盘的UUID为 a314bb2f-c879-4e1d-9669-251a5e49f54f</p>
+
+<p>使用磁盘的UUID给磁盘扩容</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; VBoxManage modifyhd a314bb2f-c879-4e1d-9669-251a5e49f54f --resize 20480
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此时磁盘中被扩展的那部分空间还没被分配, 需要在系统中操作</p>
+
+<h1>分区扩展</h1>
+
+<p>虽然说ext4分区的收缩和扩展技术是成熟的, 但由于之前的分区是老版的cfdisk创建的, 引导区的大小是62个扇区, 分区是从63扇区开始的, 而现在所有的Linux上的工具都默认从2048个扇区开始分配空间, 因此会造成根分区被删除后重建时, 分区上的数据信息会丢失, 目前对此没有找到可行的方案; 因此采用如下方案, 同时也会记录原方案, 方便以后对2,3,4分区的扩展; 采用的方案是: 采用Linux的逻辑卷(LVM)的管理办法。</p>
+
+<h2>LVM解决方案</h2>
+
+<p>简单的说就是重构现在的磁盘结构, 全面换成LVM磁盘</p>
+
+<p>(1) 创建一个新磁盘, 和安装盘一起连接到虚拟机上, 重启, 进入安装系统</p>
+
+<p>(2) 开始新磁盘的分区操作</p>
+
+<p>由于要采用LVM的磁盘管理办法, 首先要对安装系统做如下操作</p>
+
+<p>安装lvm2</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; pacman -Syy
+</span><span class='line'>&gt;&gt; pacman -S lvm2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>加载 dm_mod</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; modprobe dm_mod
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>物理分区, 和以前一样, 这次采用fdisk来处理</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; fdisk /dev/sdb
+</span><span class='line'>Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: n
+</span><span class='line'>Partition <span class="nb">type</span>:
+</span><span class='line'>   p   primary <span class="o">(</span><span class="m">0</span> primary, <span class="m">0</span> extended, <span class="m">4</span> free<span class="o">)</span>
+</span><span class='line'>   e   extended
+</span><span class='line'>Select <span class="o">(</span>default p<span class="o">)</span>: p
+</span><span class='line'>Partition number <span class="o">(</span>1-4, default 1<span class="o">)</span>: 1
+</span><span class='line'>First sector <span class="o">(</span>2048-41943039, default 2048<span class="o">)</span>:
+</span><span class='line'>Last sector, +sectors or +size<span class="o">{</span>K,M,G,T,P<span class="o">}</span> <span class="o">(</span>2048-41943039, default 41943039<span class="o">)</span>:
+</span><span class='line'>
+</span><span class='line'>Created a new partition <span class="m">1</span> of <span class="nb">type</span> <span class="s1">&#39;Linux&#39;</span> and of size <span class="m">20</span> GiB.
+</span><span class='line'>
+</span><span class='line'>Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: t
+</span><span class='line'>Selected partition 1
+</span><span class='line'>Hex code <span class="o">(</span><span class="nb">type </span>L to list all codes<span class="o">)</span>: 8e
+</span><span class='line'>Changed <span class="nb">type </span>of partition <span class="s1">&#39;Linux&#39;</span> to <span class="s1">&#39;Linux LVM&#39;</span>.
+</span><span class='line'>
+</span><span class='line'>Command <span class="o">(</span>m <span class="k">for</span> <span class="nb">help</span><span class="o">)</span>: w
+</span><span class='line'>The partition table has been altered.
+</span><span class='line'>Calling ioctl<span class="o">()</span> to re-read partition table.
+</span><span class='line'>Syncing disks.
+</span><span class='line'>
+</span><span class='line'>&gt;&gt; fdisk -l /dev/sdb
+</span><span class='line'>
+</span><span class='line'>Disk /dev/sdb: <span class="m">20</span> GiB, <span class="m">21474836480</span> bytes, <span class="m">41943040</span> sectors
+</span><span class='line'>Units: sectors of <span class="m">1</span> * <span class="nv">512</span> <span class="o">=</span> <span class="m">512</span> bytes
+</span><span class='line'>Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+</span><span class='line'>I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: <span class="m">512</span> bytes / <span class="m">512</span> bytes
+</span><span class='line'>Disklabel <span class="nb">type</span>: dos
+</span><span class='line'>Disk identifier: 0x00000000
+</span><span class='line'>
+</span><span class='line'>Device    Boot Start       End   Blocks  Id System
+</span><span class='line'>/dev/sdb1       <span class="m">2048</span>  <span class="m">41943039</span> <span class="m">20970496</span>  8e Linux LVM
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>开始设置LVM磁盘系统</p>
+
+<p>创建物理卷 Physical Volume</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; pvcreate /dev/sdb1
+</span><span class='line'>&gt;&gt; pvdisplay
+</span><span class='line'>--- Physical volume ---
+</span><span class='line'>  PV Name               /dev/sda1
+</span><span class='line'>  VG Name               root
+</span><span class='line'>  PV Size               20.00 GiB / not usable 3.00 MiB
+</span><span class='line'>  Allocatable           yes <span class="o">(</span>but full<span class="o">)</span>
+</span><span class='line'>  PE Size               4.00 MiB
+</span><span class='line'>  Total PE              5119
+</span><span class='line'>  Free PE               0
+</span><span class='line'>  Allocated PE          5119
+</span><span class='line'>  PV UUID               BduFVm-tKMn-JDPf-b1U8-vcs8-8YDk-FNsW0e
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建卷组 Volume Group</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; vgcreate root /dev/sdb1
+</span><span class='line'>&gt;&gt; vgdisplay
+</span><span class='line'>  --- Volume group ---
+</span><span class='line'>  VG Name               root
+</span><span class='line'>  System ID
+</span><span class='line'>  Format                lvm2
+</span><span class='line'>  Metadata Areas        1
+</span><span class='line'>  Metadata Sequence No  2
+</span><span class='line'>  VG Access             <span class="nb">read</span>/write
+</span><span class='line'>  VG Status             resizable
+</span><span class='line'>  MAX LV                0
+</span><span class='line'>  Cur LV                1
+</span><span class='line'>  Open LV               1
+</span><span class='line'>  Max PV                0
+</span><span class='line'>  Cur PV                1
+</span><span class='line'>  Act PV                1
+</span><span class='line'>  VG Size               20.00 GiB
+</span><span class='line'>  PE Size               4.00 MiB
+</span><span class='line'>  Total PE              5119
+</span><span class='line'>  Alloc PE / Size       <span class="m">5119</span> / 20.00 GiB
+</span><span class='line'>  Free  PE / Size       <span class="m">0</span> / 0
+</span><span class='line'>  VG UUID               kROehq-qYhI-U21s-Guaq-FFns-bv3R-8cIzDA
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建逻辑卷 Logical Volume, 及以后操作的卷</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; lvcreate -l +100%FREE root -n root
+</span><span class='line'>&gt;&gt; lvdisplay
+</span><span class='line'>  --- Logical volume ---
+</span><span class='line'>  LV Path                /dev/root/root
+</span><span class='line'>  LV Name                root
+</span><span class='line'>  VG Name                root
+</span><span class='line'>  LV UUID                YtEeaf-sqJJ-8VAq-MdYo-es8Q-uTtO-QulEHJ
+</span><span class='line'>  LV Write Access        <span class="nb">read</span>/write
+</span><span class='line'>  LV Creation host, <span class="nb">time </span>archiso, 2014-11-10 03:41:50 +0000
+</span><span class='line'>  LV Status              available
+</span><span class='line'>  <span class="c"># open                 1</span>
+</span><span class='line'>  LV Size                20.00 GiB
+</span><span class='line'>  Current LE             5119
+</span><span class='line'>  Segments               1
+</span><span class='line'>  Allocation             inherit
+</span><span class='line'>  Read ahead sectors     auto
+</span><span class='line'>  - currently <span class="nb">set </span>to     256
+</span><span class='line'>  Block device           254:0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(3) 磁盘格式化, 选定磁盘系统(和以前一样)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mkfs.ext4 /dev/mapper/root-root
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(4) 拷贝数据(不建议挂载磁盘后用cp命令来执行, 建议采用如下命令完成, 虽然步骤有点多, 但胜在可靠)</p>
+
+<p>采用 <code>dd</code> 来镜像拷贝磁盘</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; dd <span class="k">if</span><span class="o">=</span>/dev/sda1 <span class="nv">of</span><span class="o">=</span>/dev/mapper/root-root
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这时候你用 <code>df -h</code> 去查看 <code>/dev/mapper/root-root</code> 的容量时会发现 <code>/dev/mapper/root-root</code> 的磁盘大小和 <code>/dev/sda1</code> 的是一样的, 由于拷贝的时候连同分区表信息都一起拷贝过来了(这个问题还是在正式进入系统后才发现的), 需要做如下处理来扩展磁盘</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; resize2fs /dev/mapper/root-root 20476M
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(5) 新系统设置</p>
+
+<p>生成新的分区表信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; genfstab -U -p /mnt
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>把生成的信息写入 <code>/etc/fstab</code>, 删除以前的分区信息</p>
+
+<p>进入新系统</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; arch-chroot /mnt/new /bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置系统内核, 配合LVM文件系统</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; vim /etc/mkinitcpio.conf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>确保 udev 和 lvm2 被 mkinitcpio 加载, 确保 lvm2 在 block 和 filesystem 之间</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">HOOKS</span><span class="o">=</span><span class="s2">&quot;base udev ... block lvm2 filesystems&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以及确保 dm-mod 被加载</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">MODULES</span><span class="o">=</span><span class="s2">&quot;dm_mod ...&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装系统引导</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; grub-install --modules<span class="o">=</span>lvm --target<span class="o">=</span>i386-pc --recheck /dev/sda
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>会出现如下错误, 是由于/run在arch-chroot环境下不可用导致的, 但不会影响正常安装</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  /run/lvm/lvmetad.socket: connect failed: No such file or directory
+</span><span class='line'>  WARNING: Failed to connect to lvmetad. Falling back to internal scanning.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更新grub列表</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; grub-mkconfig -o /boot/grub/grub.cfg
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在正式进入系统后, 再重新执行一边</p>
+
+<h2>Basic 解决方案</h2>
+
+<p>简单的来说就是基于基本磁盘的收缩和扩容方案, 这个方法在这里不适用的原因是前后引导区的大小不一致(扩容时需要把分区删掉重建, 由于删除重建前后的引导区大小不一致, 使得分区起始位置不同, 而导致的分区信息丢失, 磁盘类别不可识别, 引起扩容失败), 但对于第2, 3, 4分区的扩容以及引导分区大小不会变化的磁盘, 此方案可行, 已测试过</p>
+
+<p>(1) 收缩磁盘</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; resize2fs /dev/sdaX size
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意: 1) size 小于实际分区大小且大于已用大小; 2) 此命令可能造成数据丢失, 谨慎操作; 3) 操作前, 可用 <code>e2fsck -f /dev/sdaX</code> 强制检查磁盘</p>
+
+<p>(2) 扩充磁盘</p>
+
+<p>采用 <code>fdisk /dev/sdaX</code> 来删除重建分区, 只要初始位置不变, 容量扩大, 不必担心删除时数据丢失, 之后再适用上条命令完成磁盘扩容</p>
+
+<h1>参考</h1>
+
+<blockquote><p>[1] <a href="http://www.2cto.com/os/201306/222822.html">http://www.2cto.com/os/201306/222822.html</a></p>
+
+<p>[2] <a href="https://wiki.archlinux.org/index.php/Lvm">https://wiki.archlinux.org/index.php/Lvm</a></p>
+
+<p>[3] <a href="http://www.byywee.com/page/M0/S834/834847.html">http://www.byywee.com/page/M0/S834/834847.html</a></p>
+
+<p>[4] <a href="http://bbs.chinaunix.net/thread-1972006-1-1.html">http://bbs.chinaunix.net/thread-1972006-1-1.html</a></p>
+
+<p>[5] <a href="http://linux.cn/article-3218-1.html">http://linux.cn/article-3218-1.html</a></p></blockquote>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1728,98 +2143,6 @@
 <ol>
 <li id="fn:1">
 <p>参考自DigitalOcean的官方社区, 详细信息参见<a href="https://www.digitalocean.com/community/tutorials/how-to-create-your-first-digitalocean-droplet-virtual-server">Etel Sverdlov的帖子</a><a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
-</div>
-
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-08T12:41:20+00:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/coding/'>coding</a>, <a class='category' href='/blog/categories/css/'>css</a>, <a class='category' href='/blog/categories/html/'>html</a>
-
-
-</div>
-		
-			<span class="comments"><a href="/blog/2014/10/08/html-print-media/#disqus_thread">Comments</a></span>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/10/08/html-print-media/" itemprop="url">在Html中由于打印按钮引起的风波</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>这是由打印问题引起的风波, 不过确实弥补了我对css的认识。</p>
-
-<p><strong>问题描述:</strong> 在信息打印的界面上需要放置打印按钮或者其他提示性的东西, 然而在正式打印时这些信息又不应该输出(至少打印按钮是不应该出现的)。</p>
-
-<p><strong>问题分析:</strong> 这个需求非常正常, 且不说是否每个人都找得到浏览器的打印按钮, 就单是放置那些不应该在正式文档中出现的操作或者其他的提示性信息也是非常有用的, 极大的方便了用户的使用, 至少不用天天听到别人请教打印方法(玩笑)。</p>
-
-<p>正式开始分析, 从结果上来看, 打印前后的内容变化了。第一直观印象就是有两份材料, 打印前显示一份, 打印后显示一份, 这也是我早期时候的解决方法: 对放置在页面上的打印按钮绑定JS函数, 让JS函数把页面上的信息处理干净后调用浏览器的打印功能, 这种办法遇到电脑小白没有任何问题, 但就怕遇到懂行的, 不按常理出牌, 直接采用浏览器的打印功能, 一切玩儿玩儿; 第二种就是一份材料两种显示, 这种解决方案我一直没想过, 也没干往那边想, 在查完资料后发现CSS是支持这种特性的。</p>
-
-<p><strong>解决方案:</strong> 采用CSS的<a href="http://www.w3.org/TR/css3-mediaqueries/" title="W3C Media Queries的标准">Media Queries</a>, 这个功能的作用在于使得网页在不同的媒体上有不一样的显示效果<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>, 具体的内容见<a href="http://www.w3cplus.com/blogs/airen" title="Airen Blog">Airen的博客</a>。</p>
-
-<p>在这里简单的介绍一下如何在用Media的功能来时间打印和分辨率这两个问题:</p>
-
-<p>1.打印里面的问题最常出现的是前后显示的东西不同, 其实我们需要做的就是把正常显示的关闭、把正常不现实的打开就好了, 对这部分的块给定独立的样式, 再在定义打印媒体下面独立定义即可</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@media</span> <span class="nt">print</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nt">noprint</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">display</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>2.当我们需要对待一些特殊分辨率的屏幕时(当浏览器的窗口关小了也一样), 我们主需要再创立一套针对这个分辨率的css样式即可, 不用在用JS, 把所有问题交给浏览器自己解决</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="k">@media</span> <span class="nt">screen</span> <span class="nt">and</span> <span class="o">(</span><span class="nt">max-width</span><span class="o">:</span> <span class="nt">600px</span><span class="o">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="err">选择器</span> <span class="p">{</span>
-</span><span class='line'>    <span class="err">属性</span><span class="o">:</span> <span class="err">属性值</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>参考文档:</p>
-
-<ol>
-<li>Airen 的 CSS3 Media Queries, <a href="http://www.w3cplus.com/content/css3-media-queries">http://www.w3cplus.com/content/css3-media-queries</a></li>
-</ol>
-
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>看了CSS中关于Media的介绍后才豁然开朗, 以前用JS来解决屏幕大小的适应性问题用这种办法可以很简单的解决。<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
 </ol>
 </div>
 

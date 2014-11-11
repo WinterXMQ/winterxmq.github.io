@@ -4,7 +4,7 @@
   <title><![CDATA[Category: linux | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-09T07:36:35+00:00</updated>
+  <updated>2014-11-11T12:55:53+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,267 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ArchLinux上磁盘扩展]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/10/extend-volume/"/>
+    <updated>2014-11-10T14:13:44+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/10/extend-volume</id>
+    <content type="html"><![CDATA[<p>问题: 在VBox上创建ArchLinux虚拟机的时候就想着如果硬盘不够用, 就到时候再想办法扩容, 因此当时就只搞了8G的硬盘, 其中还有1G的Swap分区; 没想到这个问题这么快就出现了, 因此就有了一下的解决方案</p>
+
+<p>问题分析:</p>
+
+<p>由于虚拟磁盘采用的是 <code>VirtualBox Disk Image</code>, 同时在ArchLinux中没有逻辑磁盘(LVM)还有就是就是系统只有单个分区, 所以不适合采用另加磁盘的挂载方式来解决。</p>
+
+<p>问题解决方案:</p>
+
+<p>总体方案: 给 <code>/</code> 分区扩容, 分两步, 1) 先给虚拟磁盘扩容; 2) 再想办法给 <code>/</code> 分区扩容</p>
+
+<h1>VBox 的虚拟磁盘扩容</h1>
+
+<p>在 VBox 中有一个管理工具可以对磁盘扩容, 支持命令行, 操作更加简便</p>
+
+<p>查看 VBox 下注册的虚拟磁盘</p>
+
+<pre><code class="bash">&gt;&gt; VBoxManage list hdds
+UUID:           a314bb2f-c879-4e1d-9669-251a5e49f54f
+Parent UUID:    base
+State:          locked write
+Type:           normal (base)
+Location:       C:\OS\Arch_Box\ArchV.vdi
+Storage format: VDI
+Capacity:       20480 MBytes
+</code></pre>
+
+<p>便可得到磁盘的UUID为 a314bb2f-c879-4e1d-9669-251a5e49f54f</p>
+
+<p>使用磁盘的UUID给磁盘扩容</p>
+
+<pre><code class="bash">&gt;&gt; VBoxManage modifyhd a314bb2f-c879-4e1d-9669-251a5e49f54f --resize 20480
+</code></pre>
+
+<p>此时磁盘中被扩展的那部分空间还没被分配, 需要在系统中操作</p>
+
+<h1>分区扩展</h1>
+
+<p>虽然说ext4分区的收缩和扩展技术是成熟的, 但由于之前的分区是老版的cfdisk创建的, 引导区的大小是62个扇区, 分区是从63扇区开始的, 而现在所有的Linux上的工具都默认从2048个扇区开始分配空间, 因此会造成根分区被删除后重建时, 分区上的数据信息会丢失, 目前对此没有找到可行的方案; 因此采用如下方案, 同时也会记录原方案, 方便以后对2,3,4分区的扩展; 采用的方案是: 采用Linux的逻辑卷(LVM)的管理办法。</p>
+
+<h2>LVM解决方案</h2>
+
+<p>简单的说就是重构现在的磁盘结构, 全面换成LVM磁盘</p>
+
+<p>(1) 创建一个新磁盘, 和安装盘一起连接到虚拟机上, 重启, 进入安装系统</p>
+
+<p>(2) 开始新磁盘的分区操作</p>
+
+<p>由于要采用LVM的磁盘管理办法, 首先要对安装系统做如下操作</p>
+
+<p>安装lvm2</p>
+
+<pre><code class="bash">&gt;&gt; pacman -Syy
+&gt;&gt; pacman -S lvm2
+</code></pre>
+
+<p>加载 dm_mod</p>
+
+<pre><code class="bash">&gt;&gt; modprobe dm_mod
+</code></pre>
+
+<p>物理分区, 和以前一样, 这次采用fdisk来处理</p>
+
+<pre><code class="bash">&gt;&gt; fdisk /dev/sdb
+Command (m for help): n
+Partition type:
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended
+Select (default p): p
+Partition number (1-4, default 1): 1
+First sector (2048-41943039, default 2048):
+Last sector, +sectors or +size{K,M,G,T,P} (2048-41943039, default 41943039):
+
+Created a new partition 1 of type 'Linux' and of size 20 GiB.
+
+Command (m for help): t
+Selected partition 1
+Hex code (type L to list all codes): 8e
+Changed type of partition 'Linux' to 'Linux LVM'.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+&gt;&gt; fdisk -l /dev/sdb
+
+Disk /dev/sdb: 20 GiB, 21474836480 bytes, 41943040 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x00000000
+
+Device    Boot Start       End   Blocks  Id System
+/dev/sdb1       2048  41943039 20970496  8e Linux LVM
+</code></pre>
+
+<p>开始设置LVM磁盘系统</p>
+
+<p>创建物理卷 Physical Volume</p>
+
+<pre><code class="bash">&gt;&gt; pvcreate /dev/sdb1
+&gt;&gt; pvdisplay
+--- Physical volume ---
+  PV Name               /dev/sda1
+  VG Name               root
+  PV Size               20.00 GiB / not usable 3.00 MiB
+  Allocatable           yes (but full)
+  PE Size               4.00 MiB
+  Total PE              5119
+  Free PE               0
+  Allocated PE          5119
+  PV UUID               BduFVm-tKMn-JDPf-b1U8-vcs8-8YDk-FNsW0e
+</code></pre>
+
+<p>创建卷组 Volume Group</p>
+
+<pre><code class="bash">&gt;&gt; vgcreate root /dev/sdb1
+&gt;&gt; vgdisplay
+  --- Volume group ---
+  VG Name               root
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  2
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               20.00 GiB
+  PE Size               4.00 MiB
+  Total PE              5119
+  Alloc PE / Size       5119 / 20.00 GiB
+  Free  PE / Size       0 / 0
+  VG UUID               kROehq-qYhI-U21s-Guaq-FFns-bv3R-8cIzDA
+</code></pre>
+
+<p>创建逻辑卷 Logical Volume, 及以后操作的卷</p>
+
+<pre><code class="bash">&gt;&gt; lvcreate -l +100%FREE root -n root
+&gt;&gt; lvdisplay
+  --- Logical volume ---
+  LV Path                /dev/root/root
+  LV Name                root
+  VG Name                root
+  LV UUID                YtEeaf-sqJJ-8VAq-MdYo-es8Q-uTtO-QulEHJ
+  LV Write Access        read/write
+  LV Creation host, time archiso, 2014-11-10 03:41:50 +0000
+  LV Status              available
+  # open                 1
+  LV Size                20.00 GiB
+  Current LE             5119
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           254:0
+</code></pre>
+
+<p>(3) 磁盘格式化, 选定磁盘系统(和以前一样)</p>
+
+<pre><code class="bash">&gt;&gt; mkfs.ext4 /dev/mapper/root-root
+</code></pre>
+
+<p>(4) 拷贝数据(不建议挂载磁盘后用cp命令来执行, 建议采用如下命令完成, 虽然步骤有点多, 但胜在可靠)</p>
+
+<p>采用 <code>dd</code> 来镜像拷贝磁盘</p>
+
+<pre><code class="bash">&gt;&gt; dd if=/dev/sda1 of=/dev/mapper/root-root
+</code></pre>
+
+<p>这时候你用 <code>df -h</code> 去查看 <code>/dev/mapper/root-root</code> 的容量时会发现 <code>/dev/mapper/root-root</code> 的磁盘大小和 <code>/dev/sda1</code> 的是一样的, 由于拷贝的时候连同分区表信息都一起拷贝过来了(这个问题还是在正式进入系统后才发现的), 需要做如下处理来扩展磁盘</p>
+
+<pre><code class="bash">&gt;&gt; resize2fs /dev/mapper/root-root 20476M
+</code></pre>
+
+<p>(5) 新系统设置</p>
+
+<p>生成新的分区表信息</p>
+
+<pre><code class="bash">&gt;&gt; genfstab -U -p /mnt
+</code></pre>
+
+<p>把生成的信息写入 <code>/etc/fstab</code>, 删除以前的分区信息</p>
+
+<p>进入新系统</p>
+
+<pre><code class="bash">&gt;&gt; arch-chroot /mnt/new /bin/zsh
+</code></pre>
+
+<p>设置系统内核, 配合LVM文件系统</p>
+
+<pre><code class="bash">&gt;&gt; vim /etc/mkinitcpio.conf
+</code></pre>
+
+<p>确保 udev 和 lvm2 被 mkinitcpio 加载, 确保 lvm2 在 block 和 filesystem 之间</p>
+
+<pre><code class="bash">HOOKS="base udev ... block lvm2 filesystems"
+</code></pre>
+
+<p>以及确保 dm-mod 被加载</p>
+
+<pre><code class="bash">MODULES="dm_mod ..."
+</code></pre>
+
+<p>安装系统引导</p>
+
+<pre><code class="bash">&gt;&gt; grub-install --modules=lvm --target=i386-pc --recheck /dev/sda
+</code></pre>
+
+<p>会出现如下错误, 是由于/run在arch-chroot环境下不可用导致的, 但不会影响正常安装</p>
+
+<pre><code class="bash">  /run/lvm/lvmetad.socket: connect failed: No such file or directory
+  WARNING: Failed to connect to lvmetad. Falling back to internal scanning.
+</code></pre>
+
+<p>更新grub列表</p>
+
+<pre><code class="bash">&gt;&gt; grub-mkconfig -o /boot/grub/grub.cfg
+</code></pre>
+
+<p>在正式进入系统后, 再重新执行一边</p>
+
+<h2>Basic 解决方案</h2>
+
+<p>简单的来说就是基于基本磁盘的收缩和扩容方案, 这个方法在这里不适用的原因是前后引导区的大小不一致(扩容时需要把分区删掉重建, 由于删除重建前后的引导区大小不一致, 使得分区起始位置不同, 而导致的分区信息丢失, 磁盘类别不可识别, 引起扩容失败), 但对于第2, 3, 4分区的扩容以及引导分区大小不会变化的磁盘, 此方案可行, 已测试过</p>
+
+<p>(1) 收缩磁盘</p>
+
+<pre><code class="bash">&gt;&gt; resize2fs /dev/sdaX size
+</code></pre>
+
+<p>注意: 1) size 小于实际分区大小且大于已用大小; 2) 此命令可能造成数据丢失, 谨慎操作; 3) 操作前, 可用 <code>e2fsck -f /dev/sdaX</code> 强制检查磁盘</p>
+
+<p>(2) 扩充磁盘</p>
+
+<p>采用 <code>fdisk /dev/sdaX</code> 来删除重建分区, 只要初始位置不变, 容量扩大, 不必担心删除时数据丢失, 之后再适用上条命令完成磁盘扩容</p>
+
+<h1>参考</h1>
+
+<blockquote><p>[1] <a href="http://www.2cto.com/os/201306/222822.html">http://www.2cto.com/os/201306/222822.html</a></p>
+
+<p>[2] <a href="https://wiki.archlinux.org/index.php/Lvm">https://wiki.archlinux.org/index.php/Lvm</a></p>
+
+<p>[3] <a href="http://www.byywee.com/page/M0/S834/834847.html">http://www.byywee.com/page/M0/S834/834847.html</a></p>
+
+<p>[4] <a href="http://bbs.chinaunix.net/thread-1972006-1-1.html">http://bbs.chinaunix.net/thread-1972006-1-1.html</a></p>
+
+<p>[5] <a href="http://linux.cn/article-3218-1.html">http://linux.cn/article-3218-1.html</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Arch Linux 安装Aur包管理器Yaourt]]></title>
@@ -560,148 +821,6 @@ A\{2,3\}B                   &lt;- 匹配 AAB AAAB
 </ol>
 </div>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ArchLinux上搭建LAMP环境]]></title>
-    <link href="http://WinterXMQ.github.io/blog/2014/10/28/lamp/"/>
-    <updated>2014-10-28T05:37:56+00:00</updated>
-    <id>http://WinterXMQ.github.io/blog/2014/10/28/lamp</id>
-    <content type="html"><![CDATA[<p>为了给基于Discuz模板的BBS增加一个小功能而在本地ArchLinux虚拟机里搭建一个BBS的测试平台</p>
-
-<h1>Apache And PHP Installation</h1>
-
-<p>分别安装 apache php 和 php-apache组件</p>
-
-<pre><code class="bash">&gt;&gt; sudo pacman -S apache php php-apache
-</code></pre>
-
-<p>启动 apache, <code>sudo systemctl start httpd</code></p>
-
-<p>测试 php 环境</p>
-
-<pre><code class="bash">&gt;&gt; sudo vim /srv/http/info.php
-</code></pre>
-
-<p>在文件中写下如下信息</p>
-
-<pre><code class="php">&lt;?php phpinfo(); ?&gt;
-</code></pre>
-
-<p>打开网页测试效果</p>
-
-<p>测试结果未生效, 在 apache 中启用 php</p>
-
-<pre><code class="bash">&gt;&gt; sudo vim /etc/httpd/conf/httpd.conf
-</code></pre>
-
-<p>查找 <code>LoadModule dir_module modules/mod_dir.so</code> 下增加</p>
-
-<pre><code class="bash">LoadModule php5_module modules/libphp5.so
-</code></pre>
-
-<p>同时在 <code>Include</code> 列表末尾增加</p>
-
-<pre><code class="bash">Include conf/extra/php5_module.conf
-</code></pre>
-
-<p>由于在 ArchLinux 中 php-apache 下的 libphp5.so 无法和 mod_mpm_event 一起工作, 会有如下错误</p>
-
-<pre><code class="bash">Apache is running a threaded MPM, but your PHP Module is not compiled to be threadsafe.  You need to recompile PHP.
-AH00013: Pre-configuration failed
-httpd.service: control process exited, code=exited status=1
-</code></pre>
-
-<p>有如下两种解决办法:</p>
-
-<p>1) 对 apache php 等重新编译, 启用 thread safety(没试过)</p>
-
-<p>2) 采用替换方法</p>
-
-<p>使用 mod_mpm_prefork, 打开 <code>/etc/httpd/conf/httpd.conf</code>, 把</p>
-
-<pre><code class="bash">LoadModule mpm_event_module modules/mod_mpm_event.so
-</code></pre>
-
-<p>替换成</p>
-
-<pre><code class="bash">LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
-</code></pre>
-
-<p>重启 apache, <code>sudo systemctl restart httpd</code>, 打开网页测试 <code>info.php</code> 页面, 看到如下画面说明 PHP 启用成功</p>
-
-<p><img src="http://img.vim-cn.com/85/64208227801a398d079fc7e0ffbb874a2e3241.jpg" alt="PHPinfo" /></p>
-
-<h1>Mysql or MariaDB Installation</h1>
-
-<p>安装 Mysql/MariaDB, <code>sudo pacman -S mysql</code></p>
-
-<p>启用 pdo_mysql.so 和 mysqli.so, 打开 <code>sudo vim /etc/php/php.ini</code>, 分别去掉如下两条配置的注释符</p>
-
-<pre><code class="bash">extension=pdo_mysql.so
-extension=mysqli.so
-</code></pre>
-
-<p>目前的配置到此结束。</p>
-
-<h1>关于Discuz的配置</h1>
-
-<p>=====增加于 2014/11/4=======</p>
-
-<p>首先把Discuz的文件放置到站点文档目录下, 初步配置一下权限</p>
-
-<pre><code class="bash">&gt;&gt; sudo chmod -R 744 upload/    ; 把所有文件文件夹的权限调低
-&gt;&gt; sudo chmod -R -x upload
-&gt;&gt; sudo chmod -R +x upload      ; 这两个命令完成 取消文件的执行权限
-&gt;&gt; sudo mv upload/* /sur/http/
-</code></pre>
-
-<blockquote><p>出现三个问题:</p>
-
-<p>(1) GD库没安装</p>
-
-<p>(2) 文件权限需要重启配置</p>
-
-<p>(3) PHP不能正确连接mysql</p></blockquote>
-
-<p>解决方案</p>
-
-<p>(1) 安装GD库</p>
-
-<pre><code class="bash">&gt;&gt; sudo pacman -S php-gd
-</code></pre>
-
-<p>配置php, 打开 <code>sudo vim /etc/php/php.ini</code>, 取消 <code>extension=gd.so</code></p>
-
-<p>重启apache服务, <code>sudo systemctl retstart httpd</code></p>
-
-<p>(2) 配置文件权限</p>
-
-<pre><code class="bash">&gt;&gt; sudo chown -R http:http config
-&gt;&gt; sudo chown -R http:http data
-&gt;&gt; sudo chown -R http:http uc_client/data/cache
-&gt;&gt; sudo chown -R http:http uc_server/data
-</code></pre>
-
-<p>(3) 检查mysql与php的情况</p>
-
-<p>编辑php.ini, <code>sudo vim /etc/php/php.ini</code>, 确保一下三条处于打开的状态</p>
-
-<pre><code class="bash">extension=mysql.so
-extension=mysqli.so
-extension=pdo_mysql.so
-</code></pre>
-
-<p>此外还要解决数据库初始化的问题</p>
-
-<pre><code class="bash">&gt;&gt; sudo mysql_secure_installation
-&gt;&gt; sudo systemctl restart mysqld
-</code></pre>
-
-<h1>参考文献</h1>
-
-<p><a href="https://wiki.archlinux.org/index.php/Apache">https://wiki.archlinux.org/index.php/Apache</a></p>
 ]]></content>
   </entry>
   

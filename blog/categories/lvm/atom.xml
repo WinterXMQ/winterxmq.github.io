@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: vbox | 落寞纷飞]]></title>
-  <link href="http://WinterXMQ.github.io/blog/categories/vbox/atom.xml" rel="self"/>
+  <title><![CDATA[Category: lvm | 落寞纷飞]]></title>
+  <link href="http://WinterXMQ.github.io/blog/categories/lvm/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
   <updated>2014-11-11T12:55:53+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
@@ -271,66 +271,6 @@ Device    Boot Start       End   Blocks  Id System
 <p>[4] <a href="http://bbs.chinaunix.net/thread-1972006-1-1.html">http://bbs.chinaunix.net/thread-1972006-1-1.html</a></p>
 
 <p>[5] <a href="http://linux.cn/article-3218-1.html">http://linux.cn/article-3218-1.html</a></p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[VBox下Linux与主机Windows的文件共享]]></title>
-    <link href="http://WinterXMQ.github.io/blog/2014/10/06/vbox-linux-file-share/"/>
-    <updated>2014-10-06T06:36:11+00:00</updated>
-    <id>http://WinterXMQ.github.io/blog/2014/10/06/vbox-linux-file-share</id>
-    <content type="html"><![CDATA[<p>本文的方法参考自<a href="http://blog.csdn.net/jakiechen68/article/details/7263023" title="Blog_VBox-Linux 文件共享">jakiechen</a>, 有什么不对的地方请大家指点。</p>
-
-<p>适用对象: VBox下 子系统为Linux, 安装了增强工具包(virtualbox-guest-utils in Arch Linux)</p>
-
-<ol>
-<li>VBox 下设置共享文件夹</li>
-</ol>
-
-
-<p>在VBox下设置一个共享文件夹, 菜单栏 -> 设备 -> 共享文件夹, 在 &lsquo;共享文件夹列表&rsquo; 下增加一个固定分配。</p>
-
-<p>选择共享文件夹, 设置共享文件夹名称(不要含中文或者其他方块字)。</p>
-
-<p><strong>注意:</strong> 1. 要记住共享文件夹的名字, 不要随意变更, 这个和Linux中的设置有关, 2. 不要选择 <code>Auto-mount</code> 即自动挂载<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
-
-<p><img class="center" src="/p/pic/file_share_1.png" title="增加共享文件夹" ></p>
-
-<p><img class="center" src="/p/pic/file_share_2.png" title="增加共享文件夹列表" ></p>
-
-<ol>
-<li>Linux 下挂载</li>
-</ol>
-
-
-<p>创建文件夹 <code>mkdir -p /mnt/share</code></p>
-
-<p>挂载共享文件夹 <code>sudo mount -t vboxsf Tex /mnt/share</code></p>
-
-<p>然后就可以在 <code>/mnt/share</code> 下看到恭喜文件夹里的内容了</p>
-
-<p><em>为了方便管理, 我把这个文件夹软连接到我的工作文件夹下了, <code>ln -s /mnt/share ~/Code/tex</code></em></p>
-
-<ol>
-<li>设置自动挂载</li>
-</ol>
-
-
-<p>为了方便使用, 将其设置成自动挂载</p>
-
-<pre><code class="bash">&gt;&gt; sudo vim /etc/fstab
-Add following
-# VBox share file
-Tex     /mnt/share  vboxsf  rw,gid=100,uid=1000,auto    0 0
-</code></pre>
-<div class="footnotes">
-<hr/>
-<ol>
-<li id="fn:1">
-<p>参考自jakiechen, 上面说在下次重启后会出现由于共享文件夹为空而挂载失败, 出现的错误提示为: /sbin/mount.vboxsf: mounting failed with the error: Invalid argument<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
-</ol>
-</div>
-
 ]]></content>
   </entry>
   
