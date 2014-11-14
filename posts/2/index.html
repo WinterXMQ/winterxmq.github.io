@@ -9,7 +9,7 @@
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="debian, digitalocean, linux Comments DigitalOcean上成功搭建Debian服务器 由于Github做活动, 赠送了很多关于网站和其他的服务, 其中就包括DigitalOcean的$100的优惠, 又来, 你知道的。 Create Droplet &hellip;">
+	<meta name="description" content="debian, linux, pptp, vpn Comments Debian上开启VPN(PPTP)服务 有了纽约的服务器貌似必须开启代理模式, 虽然ShadowSocks要比VPN好多了, 但毕竟需要额外的软件或者额外的硬件, 而VPN的客户端却是各种平台上预先搭载的, &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,6 +101,156 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-11T10:37:11+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/debian/'>debian</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/pptp/'>pptp</a>, <a class='category' href='/blog/categories/vpn/'>vpn</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/10/11/debian-vpn/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/10/11/debian-vpn/" itemprop="url">Debian上开启VPN(PPTP)服务</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>有了纽约的服务器貌似必须开启代理模式, 虽然ShadowSocks要比VPN好多了, 但毕竟需要额外的软件或者额外的硬件, 而VPN的客户端却是各种平台上预先搭载的, 因此就有了想搭建VPN的想法, 开动&hellip;..</p>
+
+<p>1.First, 安装pptp的服务端</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo apt-get install pptpd
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2.Second, 配置在VPN模式下各主机的IP, <code>localip</code> 指的是VPN模式下PPTP服务器的IP, <code>remoteip</code> 指的是连接到PPTP服务器上的客户端的IP, 通常是一段范围, 编辑文件 <code>sudo vim /etc/pptpd.conf</code>, 在文件最后加上类似代码, 具体参数自定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>localip 192.168.92.1
+</span><span class='line'>remoteip 192.168.92.11-16
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3.Third, 编辑PPTP服务器参数, 参照如下参数配置, 编辑文件 <code>sudo vim /etc/pptpd.conf</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>name pptpd
+</span><span class='line'>refuse-pap
+</span><span class='line'>refuse-chap
+</span><span class='line'>refuse-mschap
+</span><span class='line'>require-mschap-v2
+</span><span class='line'>require-mppe-128
+</span><span class='line'>ms-dns 8.8.8.8
+</span><span class='line'>ms-dns 8.8.4.4
+</span><span class='line'><span class="c">#nodefaultroute</span>
+</span><span class='line'><span class="c">#debug</span>
+</span><span class='line'><span class="c">#dump</span>
+</span><span class='line'>proxyarp
+</span><span class='line'>lock
+</span><span class='line'>nobsdcomp
+</span><span class='line'><span class="c">#nologfd</span>
+</span><span class='line'>logfile /var/log/pptpd.log
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>说明:</strong></p>
+
+<ul>
+<li><p>name pptpd：pptpd server的名称</p></li>
+<li><p>refuse-pap：拒绝pap身份验证模式</p></li>
+<li><p>refuse-chap：拒绝chap身份验证模式</p></li>
+<li><p>refuse-mschap：拒绝mschap身份验证模式</p></li>
+<li><p>require-mschap-v2：在端点进行连接握手时需要使用微软的mschap-v2进行自身验证</p></li>
+<li><p>require-mppe-128：MPPE 模块使用 128 位加密</p></li>
+<li><p>ms-dns 8.8.8.8：ppp为Windows客户端提供DNS服务器IP地址，第一个ms-dns为DNS Master，第二个为DNS Slave, 此处选用的DNS是Google的</p></li>
+<li><p>proxyarp：建立 ARP 代理键值</p></li>
+<li><p>lock：锁定客户端 PTY 设备文件</p></li>
+<li><p>nobsdcomp：禁用 BSD 压缩模式</p></li>
+<li><p>nologfd：禁止将错误信息记录到标准错误输出设备(stderr)</p></li>
+</ul>
+
+
+<p>4.设置用户, 编辑文件 <code>sudo vim /etc/ppp/chap-secrets</code>, 增加这样的条目 <code>username pptpd password *</code>, 其中 username 和 password 是登录口令, pptpd是服务器上PPTP软件名(默认不动), * 指代接受的IP地址</p>
+
+<p>5.全部搞定后，我们需要重启 pptpd 服务使新配置生效 <code>sudo /etc/init.d/pptpd restart</code></p>
+
+<p>如果这时候尝试连接的话是可以连上的，但是只能访问机器资源，不能上网，想上网的话需要继续配置。</p>
+
+<p>6.配置IPV4的转发</p>
+
+<p>编辑文件 <code>sudo vim /etc/sysctl.conf</code>, 修改信息如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#net.ipv4.ip_forward=1</span>
+</span><span class='line'>net.ipv4.ip_forward<span class="o">=</span>1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后执行 <code>sudo sysctl –p</code> 使得修改生效, 看命令执行后的信息反馈中有无 <code>net.ipv4.ip_forward = 1</code> 这一条</p>
+
+<p>7.防火墙iptable信息转发</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; iptables -t nat -A POSTROUTING -s 192.168.9.0/24 -o eth0 -j MASQUERADE
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>8.查看端口是否打开</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; netstat -antl
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p>参考资料:</p>
+
+<ol>
+<li><p>Linux（VPS+Debian）搭建配置VPN（PPTP）服务 <a href="http://blog.csdn.net/frymgump/article/details/7346840">http://blog.csdn.net/frymgump/article/details/7346840</a></p></li>
+<li><p>Debian搭建vpn <a href="http://www.cnblogs.com/timeship/archive/2013/03/09/2951184.html">http://www.cnblogs.com/timeship/archive/2013/03/09/2951184.html</a></p></li>
+</ol>
+
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">

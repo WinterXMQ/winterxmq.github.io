@@ -4,7 +4,7 @@
   <title><![CDATA[落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-11T16:26:56+00:00</updated>
+  <updated>2014-11-14T05:00:07+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -12,6 +12,158 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Linux上建立GIT服务器]]></title>
+    <link href="http://WinterXMQ.github.io/blog/2014/11/13/git-server/"/>
+    <updated>2014-11-13T15:37:28+00:00</updated>
+    <id>http://WinterXMQ.github.io/blog/2014/11/13/git-server</id>
+    <content type="html"><![CDATA[<p>建立GIT私有服务器</p>
+
+<h1>取得客户端公钥</h1>
+
+<p>在客户端上生成SSH key</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; ssh-keygen -t rsa -C <span class="s2">&quot;your_email@example.com&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>把公钥复制到粘贴板</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; clip &lt; ~/.ssh/id_rsa.pub   <span class="p">;</span> Windows 上
+</span><span class='line'>&gt;&gt; <span class="nb">echo</span> ~/.ssh/id_rsa.pub     <span class="p">;</span> Linux 上
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者把公钥上传到Git服务器的<code>/tmp</code>目录下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; scp .ssh/id_rsa.pub user@&lt;host&gt;:/tmp
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>配置服务器</h1>
+
+<p>(1) 配置用户, 一般意义上而言, git用户是默认创建的, 如果没有就按照如下创建, 并给git用户指定密码, 以方便进入git用户配置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo adduser -d /home/git -G httpd,users -m git
+</span><span class='line'>&gt;&gt; passwd git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) 配置用户默认目录</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo usermod -d /home/git git
+</span><span class='line'>&gt;&gt; sudo mkdir -p /home/git
+</span><span class='line'>&gt;&gt; sudo chown -R git:users /home/git
+</span><span class='line'>&gt;&gt; sudo chmod -R <span class="m">700</span> /home/git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(3) 切换到git用户, 配置公钥</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; su git
+</span><span class='line'>&gt;&gt; mkdir .ssh
+</span><span class='line'>&gt;&gt; cat /tmp/id_rsa.pub &gt;&gt; .ssh/authorized_keys
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>创建库</h1>
+
+<p>(1) 创建库文件夹</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mkdir -p INC/sns
+</span><span class='line'>&gt;&gt; chown -R git:users INC
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) git 初始化</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; <span class="nb">cd </span>INC/sns
+</span><span class='line'>&gt;&gt; git --bare init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>客户端配置</h1>
+
+<p>建立本地库</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mkdir p <span class="o">&amp;&amp;</span> <span class="nb">cd </span>p
+</span><span class='line'>&gt;&gt; git init
+</span><span class='line'>&gt;&gt; touch README
+</span><span class='line'>&gt;&gt; git add .                                        <span class="p">;</span> 加入提交等待列表
+</span><span class='line'>&gt;&gt; git cimmit -m <span class="s2">&quot;Init the project&quot;</span>                 <span class="p">;</span> 本地提交数据
+</span><span class='line'>&gt;&gt; git remote add origin git@&lt;host&gt;:INC/sns         <span class="p">;</span> 增加远程分支
+</span><span class='line'>&gt;&gt; git push origin master                           <span class="p">;</span> 推送数据
+</span><span class='line'>&gt;&gt; git brach --set-upstream-to<span class="o">=</span>origin/master master <span class="p">;</span> 跟踪分支
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>问题</h1>
+
+<p>(1) 在推送的过程中出现如下问题</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Permissions <span class="m">0644</span> <span class="k">for</span> ‘/root/.ssh/id_rsa’ are too open
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要把 <code>.ssh/id_rsa</code> 的权限降到 0600</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; chmod <span class="m">600</span> ~/.ssh/id_rsa
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) 在CyWin中, 无论怎么使用上一条命令都无法修改<code>.ssh/id_rsa</code>的权限到0600,其原因是CyWin中的文件属性中没有group属性, 全为None, 因此做如下修改</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; chown -R ming:users ~/.ssh/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(*) 如果已经配置了git用户, 则需要配置默认shell, 以防止git用户登陆计算机</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo usermod -s /usr/bin/git-shell git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(**) 如果希望增加 http 或者 https 协议的 Git 服务器, 参考<a href="http://www.cnblogs.com/dudu/archive/2012/12/09/linux-apache-git.html">Apache上搭建git服务器</a></p>
+
+<h1>参考</h1>
+
+<blockquote><p>[1] <a href="http://www.cppblog.com/gezidan/archive/2011/08/19/153826.html">http://www.cppblog.com/gezidan/archive/2011/08/19/153826.html</a></p>
+
+<p>[2] <a href="http://www.th7.cn/system/win/201311/46849.shtml">http://www.th7.cn/system/win/201311/46849.shtml</a></p>
+
+<p>[3] <a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137583770360579bc4b458f044ce7afed3df579123eca000">http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137583770360579bc4b458f044ce7afed3df579123eca000</a></p></blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Windows8.1下管理功能失效]]></title>

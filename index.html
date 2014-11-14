@@ -9,25 +9,8 @@
 	<meta name="author" content="WinterXMQ">
 
 	
-	<meta name="description" content="system, winwods Comments Windows8.1下管理功能失效 Windows 8.1 下 计算机的管理功能失效了, 按如下方法回复 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-Windows Registry Editor &hellip;">
+	<meta name="description" content="git, linux Comments Linux上建立GIT服务器 建立GIT私有服务器 取得客户端公钥 在客户端上生成SSH key 1
+&gt;&gt; ssh-keygen -t rsa -C &quot;your_email@example.com&quot; 把公钥复制到粘贴板 1 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -119,6 +102,186 @@ Windows Registry Editor &hellip;">
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-13T15:37:28+00:00" data-updated="true" itemprop="datePublished"></time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/git/'>git</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+		
+			<span class="comments"><a href="/blog/2014/11/13/git-server/#disqus_thread">Comments</a></span>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2014/11/13/git-server/" itemprop="url">Linux上建立GIT服务器</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>建立GIT私有服务器</p>
+
+<h1>取得客户端公钥</h1>
+
+<p>在客户端上生成SSH key</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; ssh-keygen -t rsa -C <span class="s2">&quot;your_email@example.com&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>把公钥复制到粘贴板</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; clip &lt; ~/.ssh/id_rsa.pub   <span class="p">;</span> Windows 上
+</span><span class='line'>&gt;&gt; <span class="nb">echo</span> ~/.ssh/id_rsa.pub     <span class="p">;</span> Linux 上
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者把公钥上传到Git服务器的<code>/tmp</code>目录下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; scp .ssh/id_rsa.pub user@&lt;host&gt;:/tmp
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>配置服务器</h1>
+
+<p>(1) 配置用户, 一般意义上而言, git用户是默认创建的, 如果没有就按照如下创建, 并给git用户指定密码, 以方便进入git用户配置</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo adduser -d /home/git -G httpd,users -m git
+</span><span class='line'>&gt;&gt; passwd git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) 配置用户默认目录</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo usermod -d /home/git git
+</span><span class='line'>&gt;&gt; sudo mkdir -p /home/git
+</span><span class='line'>&gt;&gt; sudo chown -R git:users /home/git
+</span><span class='line'>&gt;&gt; sudo chmod -R <span class="m">700</span> /home/git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(3) 切换到git用户, 配置公钥</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; su git
+</span><span class='line'>&gt;&gt; mkdir .ssh
+</span><span class='line'>&gt;&gt; cat /tmp/id_rsa.pub &gt;&gt; .ssh/authorized_keys
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>创建库</h1>
+
+<p>(1) 创建库文件夹</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mkdir -p INC/sns
+</span><span class='line'>&gt;&gt; chown -R git:users INC
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) git 初始化</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; <span class="nb">cd </span>INC/sns
+</span><span class='line'>&gt;&gt; git --bare init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>客户端配置</h1>
+
+<p>建立本地库</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; mkdir p <span class="o">&amp;&amp;</span> <span class="nb">cd </span>p
+</span><span class='line'>&gt;&gt; git init
+</span><span class='line'>&gt;&gt; touch README
+</span><span class='line'>&gt;&gt; git add .                                        <span class="p">;</span> 加入提交等待列表
+</span><span class='line'>&gt;&gt; git cimmit -m <span class="s2">&quot;Init the project&quot;</span>                 <span class="p">;</span> 本地提交数据
+</span><span class='line'>&gt;&gt; git remote add origin git@&lt;host&gt;:INC/sns         <span class="p">;</span> 增加远程分支
+</span><span class='line'>&gt;&gt; git push origin master                           <span class="p">;</span> 推送数据
+</span><span class='line'>&gt;&gt; git brach --set-upstream-to<span class="o">=</span>origin/master master <span class="p">;</span> 跟踪分支
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>问题</h1>
+
+<p>(1) 在推送的过程中出现如下问题</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Permissions <span class="m">0644</span> <span class="k">for</span> ‘/root/.ssh/id_rsa’ are too open
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要把 <code>.ssh/id_rsa</code> 的权限降到 0600</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; chmod <span class="m">600</span> ~/.ssh/id_rsa
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(2) 在CyWin中, 无论怎么使用上一条命令都无法修改<code>.ssh/id_rsa</code>的权限到0600,其原因是CyWin中的文件属性中没有group属性, 全为None, 因此做如下修改</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; chown -R ming:users ~/.ssh/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(*) 如果已经配置了git用户, 则需要配置默认shell, 以防止git用户登陆计算机</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo usermod -s /usr/bin/git-shell git
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(**) 如果希望增加 http 或者 https 协议的 Git 服务器, 参考<a href="http://www.cnblogs.com/dudu/archive/2012/12/09/linux-apache-git.html">Apache上搭建git服务器</a></p>
+
+<h1>参考</h1>
+
+<blockquote><p>[1] <a href="http://www.cppblog.com/gezidan/archive/2011/08/19/153826.html">http://www.cppblog.com/gezidan/archive/2011/08/19/153826.html</a></p>
+
+<p>[2] <a href="http://www.th7.cn/system/win/201311/46849.shtml">http://www.th7.cn/system/win/201311/46849.shtml</a></p>
+
+<p>[3] <a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137583770360579bc4b458f044ce7afed3df579123eca000">http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137583770360579bc4b458f044ce7afed3df579123eca000</a></p></blockquote>
+
+		
+		
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1985,156 +2148,6 @@ Windows Registry Editor &hellip;">
 <p>参考自<a href="https://github.com/clowwindy/shadowsocks#configuration">shadowsocks-libev作者的Github</a>, 里面有具体的说明<a href="#fnref:3" rev="footnote">&#8617;</a></p></li>
 </ol>
 </div>
-
-
-		
-		
-	</div>
-
-</article>
-
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-11T10:37:11+00:00" data-updated="true" itemprop="datePublished"></time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/debian/'>debian</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/pptp/'>pptp</a>, <a class='category' href='/blog/categories/vpn/'>vpn</a>
-
-
-</div>
-		
-			<span class="comments"><a href="/blog/2014/10/11/debian-vpn/#disqus_thread">Comments</a></span>
-		
-	</div>
-	<h1 class="title" itemprop="name"><a href="/blog/2014/10/11/debian-vpn/" itemprop="url">Debian上开启VPN(PPTP)服务</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<p>有了纽约的服务器貌似必须开启代理模式, 虽然ShadowSocks要比VPN好多了, 但毕竟需要额外的软件或者额外的硬件, 而VPN的客户端却是各种平台上预先搭载的, 因此就有了想搭建VPN的想法, 开动&hellip;..</p>
-
-<p>1.First, 安装pptp的服务端</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; sudo apt-get install pptpd
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>2.Second, 配置在VPN模式下各主机的IP, <code>localip</code> 指的是VPN模式下PPTP服务器的IP, <code>remoteip</code> 指的是连接到PPTP服务器上的客户端的IP, 通常是一段范围, 编辑文件 <code>sudo vim /etc/pptpd.conf</code>, 在文件最后加上类似代码, 具体参数自定</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>localip 192.168.92.1
-</span><span class='line'>remoteip 192.168.92.11-16
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>3.Third, 编辑PPTP服务器参数, 参照如下参数配置, 编辑文件 <code>sudo vim /etc/pptpd.conf</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>name pptpd
-</span><span class='line'>refuse-pap
-</span><span class='line'>refuse-chap
-</span><span class='line'>refuse-mschap
-</span><span class='line'>require-mschap-v2
-</span><span class='line'>require-mppe-128
-</span><span class='line'>ms-dns 8.8.8.8
-</span><span class='line'>ms-dns 8.8.4.4
-</span><span class='line'><span class="c">#nodefaultroute</span>
-</span><span class='line'><span class="c">#debug</span>
-</span><span class='line'><span class="c">#dump</span>
-</span><span class='line'>proxyarp
-</span><span class='line'>lock
-</span><span class='line'>nobsdcomp
-</span><span class='line'><span class="c">#nologfd</span>
-</span><span class='line'>logfile /var/log/pptpd.log
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>说明:</strong></p>
-
-<ul>
-<li><p>name pptpd：pptpd server的名称</p></li>
-<li><p>refuse-pap：拒绝pap身份验证模式</p></li>
-<li><p>refuse-chap：拒绝chap身份验证模式</p></li>
-<li><p>refuse-mschap：拒绝mschap身份验证模式</p></li>
-<li><p>require-mschap-v2：在端点进行连接握手时需要使用微软的mschap-v2进行自身验证</p></li>
-<li><p>require-mppe-128：MPPE 模块使用 128 位加密</p></li>
-<li><p>ms-dns 8.8.8.8：ppp为Windows客户端提供DNS服务器IP地址，第一个ms-dns为DNS Master，第二个为DNS Slave, 此处选用的DNS是Google的</p></li>
-<li><p>proxyarp：建立 ARP 代理键值</p></li>
-<li><p>lock：锁定客户端 PTY 设备文件</p></li>
-<li><p>nobsdcomp：禁用 BSD 压缩模式</p></li>
-<li><p>nologfd：禁止将错误信息记录到标准错误输出设备(stderr)</p></li>
-</ul>
-
-
-<p>4.设置用户, 编辑文件 <code>sudo vim /etc/ppp/chap-secrets</code>, 增加这样的条目 <code>username pptpd password *</code>, 其中 username 和 password 是登录口令, pptpd是服务器上PPTP软件名(默认不动), * 指代接受的IP地址</p>
-
-<p>5.全部搞定后，我们需要重启 pptpd 服务使新配置生效 <code>sudo /etc/init.d/pptpd restart</code></p>
-
-<p>如果这时候尝试连接的话是可以连上的，但是只能访问机器资源，不能上网，想上网的话需要继续配置。</p>
-
-<p>6.配置IPV4的转发</p>
-
-<p>编辑文件 <code>sudo vim /etc/sysctl.conf</code>, 修改信息如下</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#net.ipv4.ip_forward=1</span>
-</span><span class='line'>net.ipv4.ip_forward<span class="o">=</span>1
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>然后执行 <code>sudo sysctl –p</code> 使得修改生效, 看命令执行后的信息反馈中有无 <code>net.ipv4.ip_forward = 1</code> 这一条</p>
-
-<p>7.防火墙iptable信息转发</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; iptables -t nat -A POSTROUTING -s 192.168.9.0/24 -o eth0 -j MASQUERADE
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>8.查看端口是否打开</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt;&gt; netstat -antl
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p>参考资料:</p>
-
-<ol>
-<li><p>Linux（VPS+Debian）搭建配置VPN（PPTP）服务 <a href="http://blog.csdn.net/frymgump/article/details/7346840">http://blog.csdn.net/frymgump/article/details/7346840</a></p></li>
-<li><p>Debian搭建vpn <a href="http://www.cnblogs.com/timeship/archive/2013/03/09/2951184.html">http://www.cnblogs.com/timeship/archive/2013/03/09/2951184.html</a></p></li>
-</ol>
 
 
 		
