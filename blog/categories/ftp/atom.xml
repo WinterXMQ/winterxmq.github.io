@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ftp | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/ftp/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-14T09:55:18+00:00</updated>
+  <updated>2014-11-15T03:30:21+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -107,6 +107,21 @@ virtual_use_local_privs=YES
 <pre><code class="bash">&gt;&gt; sudo mount --bind /path/to/source /srv/ftp/
 </code></pre>
 
+<p>======================Add @2014/11/15 ===============================</p>
+
+<p>在使用中发现, 只有命令和FTP工具(xftp)可以连接, Windows资源管理器、浏览器都不能访问, 查阅资料后发现是由于FTP的数据传输方式导致的, FTP的被动模式要求服务器能放过高端口的数据传输的包, 在测试中本机无法搞定ip_conntrack模式的配置, 只能限制FTP数据传输的端口, 并在防火墙上开放对应端口</p>
+
+<p>在Vsftp上限制端口, <code>sudo vim /etc/vsftp.conf</code>, 在文件尾部增加如下部分</p>
+
+<pre><code class="bash">pasv_min_port=2222
+pasv_max_port=2225
+</code></pre>
+
+<p>并开放这些端口</p>
+
+<pre><code class="bash">&gt;&gt; sudo iptables -A INPUT -p tcp --dport 2222:2225 -j ACCEPT
+</code></pre>
+
 <p>接着重启vsftpd服务器就行了</p>
 
 <h1>参考</h1>
@@ -115,7 +130,13 @@ virtual_use_local_privs=YES
 
 <p>(2) <a href="http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html">http://www.cnblogs.com/acpp/archive/2010/02/08/1665876.html</a></p>
 
-<p>(3) <a href="http://blog.chinaunix.net/uid-26263042-id-3230479.html">http://blog.chinaunix.net/uid-26263042-id-3230479.html</a></p></blockquote>
+<p>(3) <a href="http://blog.chinaunix.net/uid-26263042-id-3230479.html">http://blog.chinaunix.net/uid-26263042-id-3230479.html</a></p>
+
+<p>(4) <a href="http://blog.csdn.net/moreorless/article/details/5289147">http://blog.csdn.net/moreorless/article/details/5289147</a></p>
+
+<p>(5) <a href="http://www.2cto.com/os/201307/227994.html">http://www.2cto.com/os/201307/227994.html</a></p>
+
+<p>(6) <a href="http://blog.csdn.net/highball/article/details/8521954">http://blog.csdn.net/highball/article/details/8521954</a></p></blockquote>
 ]]></content>
   </entry>
   
