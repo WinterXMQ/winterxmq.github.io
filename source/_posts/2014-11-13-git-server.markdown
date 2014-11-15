@@ -106,6 +106,22 @@ Permissions 0644 for ‘/root/.ssh/id_rsa’ are too open
 >> chown -R ming:users ~/.ssh/
 ```
 
+(3) 无论怎么配置都只能使用密码登录, 会出现 `Permission denied (publickey..)` 的错误, 其原因是权限问题, 按如下权限修改
+
+服务器上
+
+```bash
+/home/git                       0700
+/home/git/.ssh                  0755
+/home/git/.ssh/authorized_keys  0600
+```
+
+本机上
+
+```bash
+/home/users/.ssh/id_rsa.pub     0600
+```
+
 (*) 如果已经配置了git用户, 则需要配置默认shell, 以防止git用户登陆计算机
 
 ```bash
@@ -116,8 +132,10 @@ Permissions 0644 for ‘/root/.ssh/id_rsa’ are too open
 
 # 参考
 
-> [1] http://www.cppblog.com/gezidan/archive/2011/08/19/153826.html
+> [1] [密钥不识别, 无法登陆](http://www.cppblog.com/gezidan/archive/2011/08/19/153826.html)
 
-> [2] http://www.th7.cn/system/win/201311/46849.shtml
+> [2] [CygWin上无法修改权限](http://www.th7.cn/system/win/201311/46849.shtml)
 
-> [3] http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137583770360579bc4b458f044ce7afed3df579123eca000
+> [3] [安装指导](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/00137583770360579bc4b458f044ce7afed3df579123eca000)
+
+> [4] [公钥无法登陆](http://keben1983.blog.163.com/blog/static/143638081201242511182844/)
