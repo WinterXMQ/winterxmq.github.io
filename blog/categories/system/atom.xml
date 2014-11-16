@@ -4,7 +4,7 @@
   <title><![CDATA[Category: system | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/system/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-15T03:30:21+00:00</updated>
+  <updated>2014-11-16T09:48:17+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -176,9 +176,9 @@ MKLINK [[/D] | [/H] | [/J]] Link Target
 
 <p><strong>注意:</strong> 1. 要记住共享文件夹的名字, 不要随意变更, 这个和Linux中的设置有关, 2. 不要选择 <code>Auto-mount</code> 即自动挂载<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></p>
 
-<p>{% img center /p/pic/file_share_1.png 增加共享文件夹 %}</p>
+<p><img class="center" src="/p/pic/file_share_1.png" title="增加共享文件夹" ></p>
 
-<p>{% img center /p/pic/file_share_2.png 增加共享文件夹列表 %}</p>
+<p><img class="center" src="/p/pic/file_share_2.png" title="增加共享文件夹列表" ></p>
 
 <ol>
 <li>Linux 下挂载</li>

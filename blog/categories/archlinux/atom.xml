@@ -4,7 +4,7 @@
   <title><![CDATA[Category: archlinux | 落寞纷飞]]></title>
   <link href="http://WinterXMQ.github.io/blog/categories/archlinux/atom.xml" rel="self"/>
   <link href="http://WinterXMQ.github.io/"/>
-  <updated>2014-11-15T03:30:21+00:00</updated>
+  <updated>2014-11-16T09:48:17+00:00</updated>
   <id>http://WinterXMQ.github.io/</id>
   <author>
     <name><![CDATA[WinterXMQ]]></name>
@@ -407,6 +407,15 @@ pasv_max_port=2225
 </code></pre>
 
 <p>接着重启vsftpd服务器就行了</p>
+
+<p>=======================Add @2014/11/16 ==============================</p>
+
+<p>同时发现PSAV模式上传的时候, 发现无法上传和修改文件, 只能下载, 因此做如下修改</p>
+
+<p>打开配置文件, <code>sudo vim /etc/vsftp.conf</code></p>
+
+<pre><code class="bash">pasv_enable=YES
+</code></pre>
 
 <h1>参考</h1>
 
